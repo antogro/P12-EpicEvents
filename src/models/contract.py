@@ -1,11 +1,18 @@
-from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float, Boolean
 from models.base import Base
-from validators import ContractValidator, handle_db_operation
 
 
 class Contract(Base):
+    """
+    Modele d'un contrat
+        args: - id (int),
+              - client_id (int),
+              - commercial_id (int),
+              - total_amout (float),
+              - remaining-amount (float),
+              - is_signed (bool),
+    """
     __tablename__ = "contracts"
 
     id = Column(Integer, primary_key=True)
@@ -16,5 +23,4 @@ class Contract(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     is_signed = Column(Boolean, default=False)
 
-    client = relationship("Client", back_populates="contracts")
-    events = relationship("Event", back_populates="contract")
+    __table_args__ = {'extend_existing': True}
