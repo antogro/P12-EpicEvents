@@ -1,9 +1,9 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float, Boolean
-from models.base import Base
+from models.base import BaseModel
 
 
-class Contract(Base):
+class Contract(BaseModel):
     """
     Modele d'un contrat
         args: - id (int),

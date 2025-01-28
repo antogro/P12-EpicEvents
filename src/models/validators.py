@@ -20,3 +20,24 @@ class UserValidator:
         for field in required_fields:
             if field not in kwargs:
                 raise Exception(f"Le champ {field} est requis")
+
+
+class ClientValidator:
+    @staticmethod
+    def validate_required_fields(**kwargs):
+        required_fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "company_name",
+            "commercial_id",
+        ]
+        for field in required_fields:
+            if field not in kwargs:
+                raise Exception(f"Le champ {field} est requis")
+
+    @staticmethod
+    def validate_email(email):
+        if "@" not in email:
+            raise Exception("L'email doit être valide")

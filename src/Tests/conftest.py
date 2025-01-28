@@ -65,10 +65,11 @@ def client_data():
         role: Commercial
     """
     return {
-        "full_name": "full_name",
+        "first_name": "full_name",
+        "last_name": "full_name",
         "email": "email@email.fr",
         "phone": "0101010101",
-        "company": "compagny_name",
+        "company_name": "compagny_name",
         "commercial_id": 1,
     }
 
