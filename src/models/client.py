@@ -1,13 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from models.base import Base
+from models.base import BaseModel
+from models.validators import ClientValidator
+from models.user import User
 
 
-class Client(Base):
+class Client(BaseModel):
     """
     Modele d'un client
         args: id (int),
-              name (str),
               first_name (str),
               last_name (str),
               email (str),
@@ -23,13 +24,101 @@ class Client(Base):
     email = Column(String, nullable=False, unique=True)
     phone = Column(String, nullable=False)
     company_name = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     updated_at = Column(
-        DateTime, default=datetime.now, onupdate=datetime.utcnow
+        DateTime, default=datetime.now, onupdate=datetime.now(timezone.utc)
     )
     commercial_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     __table_args__ = {'extend_existing': True}
 
     def __repr__(self):
-        return f'Client {self.full_name}'
+        return f'Client {self.first_name} {self.last_name}'
+
+    @classmethod
+    def create_object(cls, session, **kwargs) -> 'Client':
+        """
+        Crée un client
+        Utilisation : create_client(
+            session,
+            first_name (str),
+            last_name (str),
+            email='email',
+            phone='phone',
+            company_name='compagny_name',
+            commercial_id='commercial_id'
+        )
+        """
+        try:
+            ClientValidator.validate_required_fields(**kwargs)
+            ClientValidator.validate_email(kwargs['email'])
+
+            if cls.get_object(session, email=kwargs['email']):
+                raise Exception("Un client avec cet email existe déjà")
+
+            if 'commercial_id' in kwargs:
+                commercial = User.get_object(
+                    session, id=kwargs['commercial_id']
+                )
+                if not commercial or commercial.role != 'COMMERCIAL':
+                    raise Exception("Contact commercial invalide")
+
+            return cls._save_object(session, cls(**kwargs))
+        except Exception as e:
+            raise Exception(f"Erreur lors de la création du client : {str(e)}")
+
+    @classmethod
+    def update_object(cls, session, client_id: int, **kwargs) -> 'Client':
+        """
+        Met à jour un client
+        Utilisation : update_client(
+            session,
+            client_id,
+            first_name (str),
+            last_name (str),
+            email='email',
+            phone='phone',
+            compagy_name='company_name',
+            commercial_id='commercial_id'
+        )
+        """
+        try:
+            client = cls.get_object(session, id=client_id)
+            if not client:
+                raise Exception("Le client n'existe pas")
+
+            if 'email' in kwargs:
+                ClientValidator.validate_email(kwargs['email'])
+                if cls.get_object(session, email=kwargs['email']):
+                    raise Exception("Un client avec cet email existe déjà")
+            if 'commercial_id' in kwargs:
+                commercial = User.get_object(
+                    session, id=kwargs['commercial_id']
+                )
+                if not commercial or commercial.role != 'COMMERCIAL':
+                    raise Exception("Contact commercial invalide")
+
+            for key, value in kwargs.items():
+                if hasattr(client, key):
+                    setattr(client, key, value)
+
+            return cls._save_object(session, client)
+        except Exception as e:
+            raise Exception(
+                f"Une erreur lors de la mise à jour du client: {str(e)}")
+
+    @classmethod
+    def delete_object(cls, session, client_id: int):
+        """
+        Supprime un client
+        Utilisation : delete_client(session, client_id)
+        """
+        try:
+            client = cls.get_object(session, id=client_id)
+            if not client:
+                raise Exception("Le client n'existe pas")
+            return cls._delete_object(session, client)
+        except Exception as e:
+            raise Exception(
+                f"Une erreur lors de la suppression du client: {str(e)}"
+            )

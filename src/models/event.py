@@ -1,7 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from models.base import Base
-from models import Contract, User, Client
 
 
 class Event(Base):

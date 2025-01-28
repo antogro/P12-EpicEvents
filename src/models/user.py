@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime
-from models.base import Base
+from models.base import BaseModel
 from models.validators import UserValidator
 import hashlib
 import os
 
 
-class User(Base):
+class User(BaseModel):
     """
     Modele d'un utilisateur,
     contenant les informations de
@@ -31,18 +31,6 @@ class User(Base):
     def __repr__(self):
         return f'User {self.username}'
 
-    def get_user(session, **kwargs) -> 'User':
-        """
-        Récupère un utilisateur selon differents critères
-        Utilisation: get_user(session, email='email')
-        """
-        try:
-            return session.query(User).filter_by(**kwargs).first()
-        except Exception as e:
-            raise Exception(
-                f"Erreur lors de la récupération de l'utilisateur: {str(e)}"
-            )
-
     def hash_password(password):
         """
         Hashage du mot de passe
@@ -65,7 +53,8 @@ class User(Base):
         )
         return new_key == key
 
-    def create_user(session, **kwargs) -> 'User':
+    @classmethod
+    def create_object(cls, session, **kwargs) -> 'User':
         """
         Crée un utilisateur
         **kwargs: email, username, password, role
@@ -80,61 +69,60 @@ class User(Base):
         try:
             UserValidator.validate_role(kwargs['role'])
             UserValidator.validate_required_fields(kwargs)
-            if User.get_user(session, email=kwargs['email']):
+            if cls.get_object(session, email=kwargs['email']):
                 raise Exception("Un utilisateur avec cet email existe déjà")
-            user = User(**kwargs)
-            user.password = User.hash_password(kwargs['password'])
-            session.add(user)
-            session.commit()
-            return user
+            kwargs['password'] = cls.hash_password(kwargs['password'])
+            return cls._save_object(session, cls(**kwargs))
         except Exception as e:
-            session.rollback()
-            raise Exception(
-                f"Erreur lors de la création de l'utilisateur: {str(e)}"
-            )
+            raise Exception(f'Erreur lors de la création'
+                            f'de l\'utilisateur : {str(e)}')
 
-    def update_user(session, user_id, **kwargs):
+    @classmethod
+    def update_object(cls, session, user_id, **kwargs):
         """
         Met à jour un utilisateur
         **kwargs: email, username, password, role
         Utilisation : update_user(session, user_id, email='email')
         """
         try:
-            user = User.get_user(session, id=user_id)
-
+            user = cls.get_object(session, id=user_id)
             if not user:
                 raise Exception("L'utilisateur n'existe pas")
             if 'email' in kwargs and user.email != kwargs['email']:
-                if User.get_user(session, email=kwargs['email']):
+                if cls.get_object(session, email=kwargs['email']):
                     raise Exception(
                         "Un utilisateur avec cet email existe déjà"
                     )
+            if 'role' in kwargs:
+                UserValidator.validate_role(kwargs['role'])
+            
+            if 'password' in kwargs:
+                kwargs['password'] = cls.hash_password(kwargs['password'])
 
             for key, value in kwargs.items():
 
                 if hasattr(user, key):
                     setattr(user, key, value)
-            session.commit()
-            return user
+            return cls._save_object(session, user)
         except Exception as e:
             session.rollback()
             raise Exception(
                 f"Erreur lors de la mise à jour de l'utilisateur: {str(e)}"
             )
 
-    def delete_user(session, user_id):
+    @classmethod
+    def delete_object(cls, session, user_id):
         """
         Supprime un utilisateur
         Utilisation : delete_user(session, user_id)
         """
         try:
-            user = User.get_user(session, id=user_id)
+            user = cls.get_object(session, id=user_id)
 
             if not user:
                 raise Exception("L'utilisateur n'existe pas")
-            session.delete(user)
-            session.commit()
-            return user
+
+            return cls._delete_object(session, user)
         except Exception as e:
             session.rollback()
             raise Exception(
