@@ -98,6 +98,16 @@ def contract_data():
 
 
 @pytest.fixture
+def make_contract(contract_data):
+    """Fixture pour créer un club."""
+    def _make_contract(**kwargs):
+        contract = contract_data.copy()
+        contract.update(kwargs)
+        return contract
+    return _make_contract
+
+
+@pytest.fixture
 def event_data():
     """
     Fixture pour les données de test d'un évènement
