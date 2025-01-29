@@ -1,5 +1,5 @@
-from src.models.contract import Contract
-from src.models.user import User
+from models.contract import Contract
+from models.user import User
 import pytest
 
 
@@ -105,7 +105,10 @@ def test_get_contract_invalide_data_raise_exception_error(
         make_contract
 ):
     contract_fixture = make_contract()
-    session.query = Exception("DB Error")
+    mock_query = mocker.Mock()
+    mock_query.filter_by.side_effect = Exception("DB Error")
+
+    mocker.patch.object(session, "query", return_value=mock_query)
     # Exécution
     with pytest.raises(
         Exception, match="Erreur lors de la récupération:"
@@ -168,7 +171,6 @@ def test_update_contract(
         session,
         make_contract
 ):
-    # Prépare le mock pour session.query().filter_by().first()
     contract_fixture = make_contract()
     initial_contract = Contract(**contract_fixture)
     contract_id = 1
@@ -176,22 +178,16 @@ def test_update_contract(
         "total_amount": 1500,
         "remaining_amount": 1200
     }
-
-    # Crée l'utilisateur avec les données fournies
     mock_get_contract = mocker.patch.object(
         Contract, 'get_object', side_effect=[initial_contract]
     )
     mock_session_commit = mocker.patch.object(session, "commit")
 
-    # Met à jour l'utilisateur
     result = Contract.update_object(session, contract_id, **update_data)
 
-    # Vérifie que l'utilisateur a été mis à jour
     assert result.total_amount == update_data["total_amount"]
     assert mock_get_contract.call_count == 1
     mock_session_commit.assert_called_once()
-
-    # Vérifie que la méthode update() a été appelée
 
 
 def test_update_contract_with_no_contract(
@@ -203,10 +199,10 @@ def test_update_contract_with_no_contract(
         "total_amount": 1500,
         "remaining_amount": 1200
     }
-    mocker.patch(
-        "models.contract.Contract.get_object",
-        return_value=None
+    mocker.patch.object(
+        Contract, 'get_object', side_effect=None
     )
+
     with pytest.raises(Exception, match="Le contrat n'existe pas"):
         Contract.update_object(session, contract_id, **update_data)
 

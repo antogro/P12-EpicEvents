@@ -113,6 +113,8 @@ def event_data():
     Fixture pour les données de test d'un évènement
     """
     return {
+        "support_contact_id": 1,
+        "client_id": 1,
         "contract_id": 1,
         "name": "name",
         "start_date":  (
@@ -122,3 +124,13 @@ def event_data():
         "location": "location",
         "attendees": 10,
     }
+
+
+@pytest.fixture
+def make_event(event_data):
+    """Fixture pour créer un club."""
+    def _make_event(**kwargs):
+        event = event_data.copy()
+        event.update(kwargs)
+        return event
+    return _make_event
