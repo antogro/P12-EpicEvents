@@ -1,9 +1,9 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
-from models.base import Base
+from models.base import BaseModel
 
 
-class Event(Base):
+class Event(BaseModel):
     """
     Modele d'un Event
     args: - id (int),

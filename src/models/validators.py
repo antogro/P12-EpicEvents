@@ -22,6 +22,30 @@ class UserValidator:
                 raise Exception(f"Le champ {field} est requis")
 
 
+class ContractValidator:
+    @staticmethod
+    def validate_required_fields(**kwargs):
+        required_fields = [
+            "client_id",
+            "commercial_id",
+            "total_amount",
+            "remaining_amount",
+        ]
+        for field in required_fields:
+            if field not in kwargs:
+                raise Exception(f"Le champ {field} est requis")
+
+    @staticmethod
+    def validate_amounts(total_amount, remaining_amount):
+        if remaining_amount < 0 or total_amount < 0:
+            raise Exception("Les montants ne peuvent pas être négatifs")
+        if remaining_amount > total_amount:
+            raise Exception(
+                "Le montant restant ne peut pas être "
+                "supérieur au montant total"
+            )
+
+
 class ClientValidator:
     @staticmethod
     def validate_required_fields(**kwargs):
