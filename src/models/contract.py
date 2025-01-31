@@ -74,8 +74,29 @@ class Contract(BaseModel):
             ContractValidator.validate_amounts(
                 kwargs["total_amount"], kwargs["remaining_amount"]
             )
-            contract.total_amount = kwargs["total_amount"]
+            for key, value in kwargs.items():
+
+                if hasattr(contract, key):
+                    setattr(contract, key, value)
+            return cls._save_object(session, contract)
+        except Exception as e:
+            session.rollback()
+            raise Exception(
+                f"Une erreur lors de la mise à jour du contrat: {str(e)}")
+
+    @classmethod
+    def update_amount(cls, session, contract_id, **kwargs):
+        try:
+            contract = cls.get_object(session, id=contract_id)
+            if not contract:
+                raise Exception("Le contrat n'existe pas")
+
+            ContractValidator.validate_amounts(
+                kwargs["total_amount"], kwargs["remaining_amount"]
+            )
             contract.remaining_amount = kwargs["remaining_amount"]
+            if kwargs['total_amount']:
+                contract.total_amount = kwargs['total_amount']
             return cls._save_object(session, contract)
         except Exception as e:
             raise Exception(
@@ -113,3 +134,12 @@ class Contract(BaseModel):
             raise Exception(
                 f"Une erreur lors de la suppression du contrat: {str(e)}"
             )
+
+    def format_contract_data(session, contract):
+        return {
+            "ID du client": contract.client_id,
+            "ID du commercial": contract.commercial_id,
+            "Somme total à payer": contract.total_amount,
+            "Somme restante": contract.remaining_amount,
+            "Signé": contract.is_signed,
+        }

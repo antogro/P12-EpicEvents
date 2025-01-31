@@ -122,3 +122,19 @@ class Client(BaseModel):
             raise Exception(
                 f"Une erreur lors de la suppression du client: {str(e)}"
             )
+
+    def format_client_data(session, client):
+        """
+        Format les données du client pour la mise en page
+        """
+        commercial = User.get_object(session, id=client.commercial_id)
+        return {
+                "ID": client.id,
+                "First name": client.first_name,
+                "Last_name": client.last_name,
+                "Email": client.email,
+                "Phone": client.phone,
+                "Company name": client.phone,
+                "Commercial Id": client.commercial_id,
+                "Commercial Name": commercial.username
+        }

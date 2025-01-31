@@ -4,6 +4,14 @@ from models.base import BaseModel
 from models.validators import UserValidator
 import hashlib
 import os
+from enum import Enum
+
+
+class UserRole(str, Enum):
+    """Enumération des rôles d'utilisateur"""
+    COMMERCIAL = "COMMERCIAL"
+    SUPPORT = "SUPPORT"
+    GESTION = "GESTION"
 
 
 class User(BaseModel):
@@ -24,8 +32,10 @@ class User(BaseModel):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     role = Column(String, nullable=False)
 
+    __table_args__ = {'extend_existing': True}
     __table_args__ = {'extend_existing': True}
 
     def __repr__(self):
@@ -95,7 +105,7 @@ class User(BaseModel):
                     )
             if 'role' in kwargs:
                 UserValidator.validate_role(kwargs['role'])
-            
+
             if 'password' in kwargs:
                 kwargs['password'] = cls.hash_password(kwargs['password'])
 
@@ -128,3 +138,14 @@ class User(BaseModel):
             raise Exception(
                 f"Erreur lors de la suppression de l'utilisateur: {str(e)}"
             )
+
+    def format_user_data(session, user):
+        """
+        Format les données de l'utilisateur pour la mise en page
+        """
+        return {
+                "ID": str(user.id),
+                "Username": user.username,
+                "Email": user.email,
+                "Role": str(user.role)
+        }

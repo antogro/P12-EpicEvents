@@ -75,8 +75,8 @@ class Event(BaseModel):
                 kwargs['end_date'], "%Y-%m-%d %H:%M:%S")
 
             contrat = Contract.get_object(session, id=kwargs['contract_id'])
-            if not contrat:
-                raise Exception("Le contrat n'existe pas")
+            if not contrat or not contrat.is_signed:
+                raise Exception("Le contrat n'existe pas ou n'est pas signé.")
 
             if 'support_contact_id' in kwargs and kwargs['support_contact_id']:
                 support_contact = User.get_object(

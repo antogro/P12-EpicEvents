@@ -36,14 +36,18 @@ class ContractValidator:
                 raise Exception(f"Le champ {field} est requis")
 
     @staticmethod
-    def validate_amounts(total_amount, remaining_amount):
-        if remaining_amount < 0 or total_amount < 0:
-            raise Exception("Les montants ne peuvent pas être négatifs")
-        if remaining_amount > total_amount:
-            raise Exception(
-                "Le montant restant ne peut pas être "
-                "supérieur au montant total"
-            )
+    def validate_amounts(total_amount=None, remaining_amount=None):
+        if remaining_amount:
+            if remaining_amount < 0:
+                raise Exception("Les montants ne peuvent pas être négatifs")
+        else:
+            if remaining_amount < 0 or total_amount < 0:
+                raise Exception("Les montants ne peuvent pas être négatifs")
+            if remaining_amount > total_amount:
+                raise Exception(
+                    "Le montant restant ne peut pas être "
+                    "supérieur au montant total"
+                )
 
 
 class EventValidator:

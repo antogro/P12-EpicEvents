@@ -47,9 +47,13 @@ def test_create_contract_should_raise_error_with_invalide_required_fields(
 def test_create_contract_should_raise_error_invalide_amount(
     mocker,
     session,
-    make_contract
+    make_contract,
+    make_user
 ):
+    user_fixture = make_user(role="COMMERCIAL")
     contract_fixture = make_contract(remaining_amount=1100)
+    mocker.patch.object(User, 'get_object', return_value=user_fixture)
+
     mocker.patch.object(Contract, 'get_object', return_value=None)
 
     with pytest.raises(Exception) as e:
@@ -210,9 +214,12 @@ def test_update_contract_with_no_contract(
 def test_update_contract_with_wrong_amount(
     mocker,
     session,
-    make_contract
+    make_contract,
+    make_user
 ):
     update_data = make_contract(remaining_amount=1100)
+    mocker.patch.object(User, 'get_object', return_value=make_user())
+
     mocker.patch.object(Contract, 'get_object', return_value=make_contract())
     with pytest.raises(Exception) as e:
         Contract.update_object(session, 1, **update_data)
