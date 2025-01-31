@@ -8,15 +8,12 @@ from models.relationships import setup_relationships
 from models.base import Base
 
 
-def init_database(database_url='sqlite:epic_events.db'):
+def init_database(database_url='sqlite:///epic_events.db'):
     """Initialise la base de données et crée toutes les tables"""
-    # Création du moteur de base de données
     engine = create_engine(database_url)
 
-    # Configuration des relations
     setup_relationships()
 
-    # Création de toutes les tables
     Base.metadata.create_all(engine)
 
 

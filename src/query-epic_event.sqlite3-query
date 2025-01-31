@@ -1,0 +1,82 @@
+-- database: ../epic_event.db
+
+SELECT * FROM "table-name";
+-- Table des utilisateurs (employés d'Epic Events)
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('COMMERCIAL', 'SUPPORT', 'GESTION')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME
+);
+
+-- Table des clients
+CREATE TABLE clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    company_name VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    commercial_id INTEGER NOT NULL,
+    FOREIGN KEY (commercial_id) REFERENCES users(id)
+);
+
+-- Table des contrats
+CREATE TABLE contracts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    commercial_id INTEGER NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    remaining_amount DECIMAL(10,2) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_signed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (client_id) REFERENCES clients(id),
+    FOREIGN KEY (commercial_id) REFERENCES users(id)
+);
+
+-- Table des événements
+CREATE TABLE events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    contract_id INTEGER NOT NULL,
+    support_contact_id INTEGER,
+    client_id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    attendees INTEGER NOT NULL,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (contract_id) REFERENCES contracts(id),
+    FOREIGN KEY (client_id) REFERENCES clients(id),
+    FOREIGN KEY (support_contact_id) REFERENCES users(id)
+);
+
+-- Trigger pour mettre à jour le updated_at des clients
+CREATE TRIGGER update_client_timestamp
+AFTER UPDATE ON clients
+BEGIN
+    UPDATE clients SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.id;
+END;
+
+-- Trigger pour mettre à jour le updated_at des événements
+CREATE TRIGGER update_event_timestamp
+AFTER UPDATE ON events
+BEGIN
+    UPDATE events SET updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.id;
+END;
+
+-- Index pour améliorer les performances
+CREATE INDEX idx_clients_commercial ON clients(commercial_id);
+CREATE INDEX idx_contracts_client ON contracts(client_id);
+CREATE INDEX idx_events_contract ON events(contract_id);
+CREATE INDEX idx_events_support ON events(support_contact_id);
+CREATE INDEX idx_event_client ON events(client_id);
