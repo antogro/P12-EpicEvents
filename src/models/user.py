@@ -1,5 +1,23 @@
 from datetime import datetime, timezone
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime
+from models.base import BaseModel
+from models.validators import UserValidator
+import hashlib
+import os
+
+
+class User(BaseModel):
+    """
+    Modele d'un utilisateur,
+    contenant les informations de
+    base et les informations de connexion.
+        args: id (int),
+              username (str),
+              email (str),
+              password (str),
+              role (str)
+    """
 from models.base import BaseModel
 from models.validators import UserValidator
 import hashlib
@@ -32,8 +50,10 @@ class User(BaseModel):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     role = Column(String, nullable=False)
 
+    __table_args__ = {'extend_existing': True}
     __table_args__ = {'extend_existing': True}
 
     def __repr__(self):
@@ -103,7 +123,7 @@ class User(BaseModel):
                     )
             if 'role' in kwargs:
                 UserValidator.validate_role(kwargs['role'])
-
+            
             if 'password' in kwargs:
                 kwargs['password'] = cls.hash_password(kwargs['password'])
 

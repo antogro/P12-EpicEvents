@@ -18,7 +18,7 @@ Session = sessionmaker(bind=engine)
 display = Display()
 
 contract_app = typer.Typer(name='Epic Events contract Management',
-                       help='Application de Gestion des Contrats Epic Event')
+                           help='Application de Gestion des Contrats Epic Event')
 
 
 def get_session():
@@ -63,7 +63,12 @@ def contract_list(
         None, help="Contrat pas entièrement payés"),
 ):
     contract_headers = [
-        "ID du client", "ID du commercial", "Somme total à payer", "Somme restante", "Signé"]
+        "ID du client",
+        "ID du commercial",
+        "Somme total à payer",
+        "Somme restante",
+        "Signé"
+    ]
     session = get_session()
     try:
         contracts = []
@@ -83,7 +88,8 @@ def contract_list(
             if not contracts:
                 typer.secho("❌ Aucun contrat signé",
                             fg=typer.colors.RED)
-            contracts = [contract for contract in contracts if contract.is_signed]
+            contracts = [
+                contract for contract in contracts if contract.is_signed]
         elif contract_amount_left:
             contracts = Contract.get_all_object(session, Contract)
             for contract in contracts:
@@ -96,12 +102,11 @@ def contract_list(
         display.table(
             title="Liste des clients",
             headers=contract_headers,
-            items=[Contract.format_contract_data(session, contract) for contract in contracts],
+            items=[
+                Contract.format_contract_data(
+                    session, contract) for contract in contracts],
         )
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
         session.close()
-
-
-
