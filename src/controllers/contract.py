@@ -54,10 +54,10 @@ def create(
         session.close()
 
 
-@contract_app.command(name="list")
+@contract_app.command(name="repport")
 def contract_list(
     client_id: Optional[int] = typer.Option(None, help="ID de client"),
-    contract_id: Optional[int] = typer.Option(None, help="ID du contrat"),
+    id: Optional[int] = typer.Option(None, help="ID du contrat"),
     is_signed: Optional[bool] = typer.Option(None, help="Contrats signés"),
     contract_amount_left: Optional[bool] = typer.Option(
         None, help="Contrat pas entièrement payés"),
@@ -80,7 +80,7 @@ def contract_list(
     try:
         # Récupération des contrats en fonction des filtres
         contracts = get_filtered_contracts(
-            session, client_id, contract_id, is_signed, contract_amount_left)
+            session, client_id, id, is_signed, contract_amount_left)
 
         # Vérification si aucun contrat trouvé
         if not contracts:
@@ -104,14 +104,14 @@ def contract_list(
 
 @contract_app.command(name="sign-contract")
 def sign_contract(
-        contract_id: int = typer.Option(None, help="ID du contrat à signer"),
+        id: int = typer.Option(None, help="ID du contrat à signer"),
 ):
     typer.confirm("Validation de la signature du contrat ✅")
     session = get_session()
     try:
-        Contract.sign_object(session, contract_id=contract_id)
+        Contract.sign_object(session, contract_id=id)
         typer.secho(
-            f"✅ Contrat n°'{contract_id}' signé avec succès !",
+            f"✅ Contrat n°'{id}' signé avec succès !",
         )
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
@@ -119,7 +119,7 @@ def sign_contract(
 
 @contract_app.command(name="payment")
 def payment(
-    contract_id: int = typer.Option(
+    id: int = typer.Option(
         None, help="ID du contrat pour lequel effectuer le paiement"),
     amount: float = typer.Option(
         None, help="Montant du paiment pour le contrat"),
@@ -131,11 +131,11 @@ def payment(
     try:
         Contract.update_amount(
             session,
-            contract_id=contract_id,
+            contract_id=id,
             remaining_amount=amount,
             total_amount=change_total_amount
         )
-        typer.secho(f"✅ Paiement du contrat n°'{contract_id}' effect")
+        typer.secho(f"✅ Paiement du contrat n°'{id}' effect")
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
@@ -144,14 +144,14 @@ def payment(
 
 @contract_app.command()
 def delete(
-    contract_id: int = typer.Option(None, help="ID du contrat à supprimer")
+    id: int = typer.Option(None, help="ID du contrat à supprimer")
 ):
     typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
     session = get_session()
     try:
-        Contract.delete_object(session, contract_id)
+        Contract.delete_object(session, id)
         typer.secho(
-            f'✅ Utilisateur {contract_id} supprimé avec succès',
+            f'✅ Utilisateur {id} supprimé avec succès',
             fg=typer.colors.GREEN)
 
     except Exception as e:
@@ -161,23 +161,20 @@ def delete(
 def get_filtered_contracts(
         session,
         client_id=None,
-        contract_id=None,
+        id=None,
         is_signed=False,
         contract_amount_left=False
 ):
     """
     Récupère les contrats filtrés en fonction des paramètres fournis.
     """
+    contracts = Contract.get_all_object(session, Contract)
     if client_id:
-        contracts = Contract.get_all_object(session, Contract, id=client_id)
-    elif contract_id:
-        contracts = Contract.get_all_object(
-            session, Contract, commercial_id=contract_id)
-    else:
-        contracts = Contract.get_all_object(session, Contract)
-    if is_signed:
+        contracts = [contract for contract in contracts if contract.client_id]
+    elif id:
+        contracts = [contract for contract in contracts if contract.id]
+    elif is_signed:
         contracts = [contract for contract in contracts if contract.is_signed]
-
     if contract_amount_left:
         contracts = [
             contract for contract in contracts if contract.remaining_amount > 0

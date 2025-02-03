@@ -5,20 +5,20 @@ from sqlalchemy.orm import sessionmaker
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from models.client import Client
 from models.user import User
 from view.display_view import Display
 
-engine = create_engine('sqlite:///./epic_event.db')
+engine = create_engine("sqlite:///./epic_event.db")
 Session = sessionmaker(bind=engine)
 display = Display()
 
-client_app = typer.Typer(name='Epic Events client Management',
-                         help='Application de Gestion des clients Epic Event')
+client_app = typer.Typer(
+    name="Epic Events client Management",
+    help="Application de Gestion des clients Epic Event",
+)
 
 
 def get_session():
@@ -40,65 +40,86 @@ def create_client(
         session = get_session()
         client = Client.create_object(
             session,
-            first_name=first_name,
-            last_name=last_name,
+            first_name=first_name.replace("-", " "),
+            last_name=last_name.replace("-", " "),
             email=email,
             phone=phone,
-            company_name=company_name,
+            company_name=company_name.replace("-", " "),
             commercial_id=commercial_id,
         )
         typer.secho(
-            f"✅ Client '{client.first_name} {client.last_name}' créé avec succès !",
-            fg=typer.colors.GREEN
+            f"✅ Client '{client.first_name} {client.last_name}' "
+            f"créé avec succès !",
+            fg=typer.colors.GREEN,
         )
     except Exception as e:
-        typer.secho(f"❌ Erreur lors de la création du client : {str(e)}", fg=typer.colors.RED)
+        typer.secho(
+            f"❌ Erreur lors de la création du client : {str(e)}",
+            fg=typer.colors.RED
+        )
     finally:
         session.close()
 
 
-@client_app.command(name="list")
+@client_app.command(name="repport")
 def client_list(
-    client_id: Optional[int] = typer.Option(
-        None,
-        help="ID du client pour afficher les détails"),
+    id: Optional[int] = typer.Option(
+        None, help="ID du client pour afficher les détails"
+    ),
     commercial_id: Optional[int] = typer.Option(
         None,
         help="ID du commercial pour afficher les clients",
-    )
+    ),
 ):
     """Affiche la liste des clients"""
     session = get_session()
-    headers = ["ID", "First name", "Last_name", "Email", "Phone", "Company name", "Commercial Id", "Commercial Name"]
+    headers = [
+        "ID",
+        "First name",
+        "Last_name",
+        "Email",
+        "Phone",
+        "Company name",
+        "Commercial ID",
+        "Commercial Name",
+    ]
     try:
-        if client_id:
-            client = Client.get_object(session, id=client_id)
+        if id:
+            client = Client.get_object(session, id=id)
             if client:
                 display.table(
                     title="Détails du client",
                     headers=headers,
-                    items=[Client.format_client_data(session, client)]
+                    items=[Client.format_client_data(session, client)],
                 )
             else:
                 typer.secho("❌ Client non trouvé", fg=typer.colors.RED)
         else:
             clients = Client.get_all_object(session, Client)
             if commercial_id:
-                clients = [client for client in clients if client.commercial_id == commercial_id]
+                clients = [
+                    client
+                    for client in clients
+                    if client.commercial_id == commercial_id
+                ]
                 display.table(
                     title="Liste des clients pour ce commercial",
                     headers=headers,
-                    items=[Client.format_client_data(session, client) for client in clients],
-                    exclude_headers=['Commercial Name', 'Company name']
-
+                    items=[
+                        Client.format_client_data(session, client)
+                        for client in clients
+                    ],
+                    exclude_headers=["Commercial Name", "Company name"],
                 )
             else:
                 display.table(
                     title="Liste des clients",
                     headers=headers,
-                    items=[Client.format_client_data(session, client) for client in clients],
-                    exclude_headers=['Commercial Name', 'Company name']
-
+                    items=[
+                        Client.format_client_data(session, client)
+                        for client in clients
+                    ],
+                    exclude_headers=["Commercial Name", "Company name"],
                 )
 
     except Exception as e:
@@ -107,18 +128,52 @@ def client_list(
         session.close()
 
 
-@client_app.command()
-def delete(
-        client_id: Optional[int] = typer.Option(
-        None, help="ID du client à supprimer")
+@client_app.command(name="update")
+def update_client(
+    id: Optional[int] = typer.Option(
+        None, help="ID du client pour afficher les détails"
+    ),
+    first_name: Optional[str] = typer.Option(
+        None, help="Prénom du client"),
+    last_name: Optional[str] = typer.Option(
+        None, help="Nom de Famille du client"),
+    email: Optional[str] = typer.Option(
+        None, help="Adresse e-mail du client"),
+    phone: Optional[str] = typer.Option(
+        None, help="Numéro de téléphone du client"),
+    company_name: Optional[str] = typer.Option
+    (None, help="Nom de la compagnie"),
+    commercial_id: Optional[int] = typer.Option(
+        None, help="ID du commercial"),
 ):
+    """Mise à jour d'un client"""
+    session = Session()
+    try:
+        client = Client.update_object(
+            session,
+            client_id=id,
+            first_name=first_name.replace("-", " ") if first_name else None,
+            last_name=last_name.replace("-", " ") if last_name else None,
+            email=email,
+            phone=phone,
+            company_name=company_name.replace(
+                "-", " ") if company_name else None,
+            commercial_id=commercial_id,
+        )
+        typer.secho(
+            f"✅ Evenement du contrat n°'{client.id}' créé avec succès!")
+    except Exception as e:
+        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
+
+
+@client_app.command()
+def delete(id: Optional[int] = typer.Option(
+        None, help="ID du client à supprimer")):
     typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
     session = get_session()
     try:
-        Client.delete_object(session, client_id)
-        typer.secho(
-            f'Client {client_id} supprimé avec succès',
-            fg=typer.colors.GREEN)
+        Client.delete_object(session, id)
+        typer.secho(f"Client {id} supprimé avec succès", fg=typer.colors.GREEN)
     except Exception as e:
         typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
 

@@ -68,16 +68,17 @@ class EventValidator:
                 raise Exception(f"Le champ {field} est requis")
 
     @staticmethod
-    def validate_dates(start_date, end_date):
-        if isinstance(start_date, str):
-            start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
-        if isinstance(end_date, str):
-            end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-        if start_date > end_date:
-            raise Exception("La date de fin doit être "
-                            "supérieure à la date de début")
-        if start_date < datetime.now():
-            raise Exception("La date de début doit être dans le futur")
+    def validate_dates(start_date=None, end_date=None):
+        if start_date and end_date:
+            start_date = DateTimeUtils.parse_date(start_date)
+            end_date = DateTimeUtils.parse_date(end_date)
+            if start_date > end_date:
+                raise Exception("La date de fin doit être "
+                                "supérieure à la date de début")
+        if start_date:
+            if start_date < datetime.now():
+                raise Exception("La date de début doit être dans le futur")
+        return start_date, end_date
 
     @staticmethod
     def validate_attendees(attendees):
@@ -104,3 +105,39 @@ class ClientValidator:
     def validate_email(email):
         if "@" not in email:
             raise Exception("L'email doit être valide")
+
+
+class DateTimeUtils:
+    """Utilitaire pour la gestion des dates et heures"""
+
+    DATE_FORMAT = "%Y-%m-%d"
+    DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+    DATETIME_CLI_FORMAT = "%Y-%m-%d_%H:%M:%S"
+
+    @staticmethod
+    def parse_date(date_str: str) -> datetime:
+        """
+        Convertit une chaîne de caractères en objet datetime
+        Accepte les formats:
+        - YYYY-MM-DD
+        - YYYY-MM-DD HH:MM:SS
+        - YYYY-MM-DD_HH:MM:SS (format CLI)
+        """
+        formats_to_try = [
+            DateTimeUtils.DATETIME_FORMAT,
+            DateTimeUtils.DATE_FORMAT,
+            DateTimeUtils.DATETIME_CLI_FORMAT
+        ]
+
+        for date_format in formats_to_try:
+            try:
+                return datetime.strptime(date_str, date_format)
+            except ValueError:
+                continue
+
+        raise ValueError(
+            "Format de date invalide. Formats acceptés:\n"
+            f"- {DateTimeUtils.DATE_FORMAT} (date simple)\n"
+            f"- {DateTimeUtils.DATETIME_FORMAT} (date et heure)\n"
+            f"- {DateTimeUtils.DATETIME_CLI_FORMAT} (CLI avec _)"
+        )

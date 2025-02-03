@@ -38,7 +38,7 @@ def create(
         session = get_session()
         user = User.create_object(
             session,
-            username=username,
+            username=username.replace("-", " "),
             email=email,
             password=password,
             role=role.value
@@ -53,8 +53,8 @@ def create(
         session.close()
 
 
-@user_app.command(name='list')
-def user_list(
+@user_app.command(name='repport')
+def user_repport(
     user_id: Optional[int] = typer.Option(
         None, help="ID d'un utilisateur spécifique"),
     role: Optional[UserRole] = typer.Option(None, help="Filtrer par rôle")

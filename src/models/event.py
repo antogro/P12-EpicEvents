@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from models.base import BaseModel
 from models import Contract, User, Client
-from models.validators import EventValidator
+from models.validators import EventValidator, DateTimeUtils
 
 
 class Event(BaseModel):
@@ -69,10 +69,9 @@ class Event(BaseModel):
             )
             EventValidator.validate_attendees(kwargs['attendees'])
 
-            kwargs['start_date'] = datetime.strptime(
-                kwargs['start_date'], "%Y-%m-%d %H:%M:%S")
-            kwargs['end_date'] = datetime.strptime(
-                kwargs['end_date'], "%Y-%m-%d %H:%M:%S")
+            kwargs['start_date'] = DateTimeUtils.parse_date(
+                kwargs['start_date'])
+            kwargs['end_date'] = DateTimeUtils.parse_date(kwargs['end_date'])
 
             contrat = Contract.get_object(session, id=kwargs['contract_id'])
             if not contrat or not contrat.is_signed:
@@ -95,42 +94,47 @@ class Event(BaseModel):
             raise Exception(f"Erreur création événement: {str(e)}")
 
     @classmethod
-    def update_object(cls, session, event_id, **kwargs):
+    def update_object(cls, session, event_id: int, **kwargs):
+        """
+        Met à jour un événement en ne modifiant que les champs fournis.
+        """
         try:
             event = cls.get_object(session, id=event_id)
             if not event:
                 raise Exception("L'événement n'existe pas")
 
-            if 'start_date' in kwargs:
-                if isinstance(kwargs['start_date'], str):
-                    kwargs['start_date'] = datetime.fromisoformat(
-                        kwargs['start_date'])
-            if 'end_date' in kwargs:
-                if isinstance(kwargs['end_date'], str):
-                    kwargs['end_date'] = datetime.fromisoformat(
-                        kwargs['end_date'])
+            # Filtrer les champs non None
+            updates = {
+                key: value for key, value in kwargs.items()
+                if value is not None}
 
-            if 'start_date' in kwargs and 'end_date' in kwargs:
-                EventValidator.validate_dates(
-                    kwargs['start_date'], kwargs['end_date'])
-            if 'attendees' in kwargs:
-                EventValidator.validate_attendees(kwargs['attendees'])
+            # Validation spécifique
+            if 'start_date' in updates or 'end_date' in updates:
+                start_date = updates.get('start_date', event.start_date)
+                end_date = updates.get('end_date', event.end_date)
+                updates['start_date'], updates['end_date'] = [
+                    EventValidator.validate_dates(start_date, end_date)
+                ]
 
-            if 'support_contact_id' in kwargs:
+            if 'attendees' in updates:
+                EventValidator.validate_attendees(updates['attendees'])
+
+            if 'support_contact_id' in updates:
                 support = User.get_object(
-                    session, id=kwargs['support_contact_id'])
+                    session, id=updates['support_contact_id']
+                )
                 if not support or support.role != 'SUPPORT':
                     raise Exception("Contact support invalide")
 
-            for key, value in kwargs.items():
-                if hasattr(event, key):
-                    setattr(event, key, value)
+            # Mise à jour des attributs valides
+            for key, value in updates.items():
+                setattr(event, key, value)
 
             return cls._save_object(session, event)
+
         except Exception as e:
-            raise Exception(
-                f"Une erreur lors de la mise à jour de l'événement: {str(e)}"
-            )
+            raise Exception(f"Une erreur lors de la mise "
+                            f"à jour de l'événement: {str(e)}")
 
     @classmethod
     def delete_object(cls, session, event_id):
@@ -147,3 +151,27 @@ class Event(BaseModel):
             raise Exception(
                 f"Erreur lors de la suppression de l'événement: {str(e)}"
             )
+
+    def format_event_data(session, event):
+        """
+        Format les données de l'événement pour la mise en page.
+        Gère correctement la conversion des dates datetime en chaînes.
+        """
+        def format_datetime(dt):
+            if isinstance(dt, datetime):
+                return dt.strftime(DateTimeUtils.DATETIME_FORMAT)
+            return str(dt)
+
+        return {
+            'ID de l\'Evènement': event.id,
+            "ID du support": event.support_contact_id,
+            "ID du client": event.client_id,
+            "ID du contrat": event.contract_id,
+            "Nom de l'évènement": event.name,
+            "Date de début": format_datetime(event.start_date),
+            "date de fin": format_datetime(event.end_date),
+            "Localisation": event.location,
+            "Nombre de participants": event.attendees,
+            "Créé le": format_datetime(event.created_at),
+            "Mise à jour le": format_datetime(event.updated_at)
+        }
