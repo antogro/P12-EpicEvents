@@ -133,7 +133,7 @@ class Client(BaseModel):
                 "Last_name": client.last_name,
                 "Email": client.email,
                 "Phone": client.phone,
-                "Company name": client.phone,
+                "Company name": client.company_name,
                 "Commercial ID": client.commercial_id,
                 "Commercial Name": commercial.username
         }

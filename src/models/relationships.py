@@ -6,6 +6,7 @@ def setup_relationships():
     from models.client import Client
     from models.contract import Contract
     from models.event import Event
+    from moels.permissions import DynamicPermission, DynamicPermissionRule
 
     # Relation entre un User et un client
     User.clients = relationship("Client", back_populates="commercial")
@@ -32,4 +33,15 @@ def setup_relationships():
     )
     Event.client_id = relationship(
         "Client", back_populates="event_id"
+    )
+
+    DynamicPermission.rules = relationship(
+        "DynamicPermissionRule",
+        back_populates="permission",
+        cascade="all, delete-orphan"
+    )
+
+    DynamicPermissionRule.permission = relationship(
+        "DynamicPermission",
+        back_populates="rules",
     )

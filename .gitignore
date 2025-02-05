@@ -173,3 +173,4 @@ cython_debug/
 
 src/query-epic_event.sqlite3-query
 src/epic_event 2.db
+src/models/permission.py

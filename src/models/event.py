@@ -161,6 +161,9 @@ class Event(BaseModel):
             if isinstance(dt, datetime):
                 return dt.strftime(DateTimeUtils.DATETIME_FORMAT)
             return str(dt)
+        notes = 
+        if event.notes is not None:
+            notes = event.notes or ''
 
         return {
             'ID de l\'Evènement': event.id,
@@ -173,5 +176,6 @@ class Event(BaseModel):
             "Localisation": event.location,
             "Nombre de participants": event.attendees,
             "Créé le": format_datetime(event.created_at),
-            "Mise à jour le": format_datetime(event.updated_at)
+            "Mise à jour le": format_datetime(event.updated_at),
+            "Notes": notes
         }

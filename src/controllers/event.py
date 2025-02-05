@@ -30,16 +30,18 @@ def get_session():
 
 @event_app.command(name="create")
 def create(
-    client_id: int = typer.Option(..., help="ID de client"),
-    support_contact_id: int = typer.Option(..., help="ID du support"),
-    contract_id: int = typer.Option(..., help="ID du contrat"),
     name: str = typer.Option(..., help="Nom de l'évenement"),
+    support_contact_id: int = typer.Option(..., help="ID du support"),
+    client_id: int = typer.Option(..., help="ID de client"),
+    contract_id: int = typer.Option(..., help="ID du contrat"),
     start_date: str = typer.Option(
         ..., help="date de début format:'aaaa-mm-dd'"),
     end_date: str = typer.Option(..., help="date de fin"),
     location: str = typer.Option(..., help="Localisation"),
     attendees: int = typer.Option(
         ..., help="Nombre de participant"),
+    notes: str = typer.Option(
+        ..., help="Description de l'évènement"),
 ):
     """Crée un contrat dans la base de données"""
     try:
@@ -54,6 +56,7 @@ def create(
             end_date=end_date,
             location=location,
             attendees=attendees,
+            notes=notes.replace("-", " ")
         )
         typer.secho(
             f"✅ Evenement du contrat n°'{event.contract_id}' créé avec succès!"
@@ -73,6 +76,8 @@ def event_repport(
         None, help="ID du support associé"),
     contract_id: Optional[int] = typer.Option(
         None, help="ID du contrat associé"),
+    notes: Optional[str] = typer.Option(
+        None, help="Description de l'évènement"),
 ):
     """Affiche les détails d'un événement"""
     event_headers = [
@@ -87,6 +92,7 @@ def event_repport(
         "Nombre de participants",
         "Créé le",
         "Mise à jour le",
+        "Notes",
     ]
     session = get_session()
     try:
