@@ -10,7 +10,6 @@ sys.path.insert(
 from models.contract import Contract
 from models.user import User
 from models.client import Client
-
 from view.display_view import Display
 
 engine = create_engine('sqlite:///./epic_event.db')

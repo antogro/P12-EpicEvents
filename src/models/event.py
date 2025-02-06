@@ -161,7 +161,7 @@ class Event(BaseModel):
             if isinstance(dt, datetime):
                 return dt.strftime(DateTimeUtils.DATETIME_FORMAT)
             return str(dt)
-        notes = 
+        notes = ''
         if event.notes is not None:
             notes = event.notes or ''
 
