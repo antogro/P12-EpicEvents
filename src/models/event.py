@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from models.base import BaseModel
-from models import Contract, User, Client
+from models.contract import Contract
+from models.user import User
+from models.client import Client
 from models.validators import EventValidator, DateTimeUtils
 
 

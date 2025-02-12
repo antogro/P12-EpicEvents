@@ -1,4 +1,4 @@
-from src.models.user import User
+from models.user import User
 import pytest
 
 
@@ -57,7 +57,8 @@ def test_create_user_should_raise_error_with_invalide_required_email(
 
 def test_creat_user_existing_email(mocker, session, make_user):
     user_fixture = make_user()
-    mocker.patch("src.models.base.BaseModel.get_object", return_value=make_user)
+    mocker.patch(
+        "src.models.base.BaseModel.get_object", return_value=make_user)
     with pytest.raises(Exception) as e:
         User.create_object(session, **user_fixture)
     assert "Un utilisateur avec cet email existe déjà" in str(e.value)
@@ -213,9 +214,11 @@ def test_update_user_with_existing_email(
     user_id = 1
     # Crée l'utilisateur avec les données fournies
     mock_session_rollback = mocker.patch.object(session, 'rollback')
-    mock_get_user = mocker.patch("src.models.user.User.get_object", side_effect=[
-        initial_user, existing_user
-    ])
+    mock_get_user = mocker.patch(
+        "src.models.user.User.get_object", side_effect=[
+            initial_user, existing_user
+        ]
+        )
     with pytest.raises(
         Exception,
         match="Un utilisateur avec cet email existe déjà"

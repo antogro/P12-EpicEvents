@@ -1,14 +1,11 @@
 from sqlalchemy import create_engine
-import os
-import sys
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-)
-from models.relationships import setup_relationships
-from models.base import Base
+from src.models.relationships import setup_relationships
+from src.models.base import Base
+from sqlalchemy.orm import sessionmaker
+from src.models.permission import PermissionManager
 
 
-def init_database(database_url='sqlite:epic_event.db'):
+def init_database(database_url="sqlite:///epic_event.db"):
     """Initialise la base de données et crée toutes les tables"""
     # Création du moteur de base de données
     engine = create_engine(database_url)
@@ -20,11 +17,41 @@ def init_database(database_url='sqlite:epic_event.db'):
     Base.metadata.create_all(engine)
 
 
+def init_permissions_and_rules(database_url="sqlite:///epic_event.db"):
+    """Initialize permissions and rules in the database"""
+    # Create database engine
+    engine = create_engine(database_url)
+
+    # Create session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        # Initialize permissions
+        print("Initializing permissions...")
+        PermissionManager.initialize_permission(session)
+        session.commit()
+        print("✅ Permissions initialized successfully!")
+
+        # Initialize rules
+        print("Initializing permission rules...")
+        PermissionManager.initialize_rules(session)
+        session.commit()
+        print("✅ Base de données initialisée avec succès!!")
+
+    except Exception as e:
+        session.rollback()
+        print(f"❌ Error during initialization: {str(e)}")
+    finally:
+        session.close()
+
+
 if __name__ == "__main__":
     try:
         init_database()
         print("✅ Base de données initialisée avec succès!")
+        init_permissions_and_rules()
     except Exception as e:
         print(
-            f"❌ Erreur lors de l'initialisation de la base de données: {str(e)}"
-        )
+            "❌ Erreur lors de l'initialisation "
+            f"de la base de données: {str(e)}")

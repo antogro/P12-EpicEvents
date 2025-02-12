@@ -1,10 +1,5 @@
-from sqlalchemy.orm import configure_mappers
-
-from .base import Base
-from .user import User
-from .client import Client
-from .contract import Contract
-from .event import Event
-
-
-__all__ = ["Base", "User", "Client", "Contract", "Event"]
+import os
+import sys
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+)

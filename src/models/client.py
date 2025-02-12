@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from models.base import BaseModel
-from models.validators import ClientValidator
-from models.user import User
+from src.models.base import BaseModel
+from src.models.validators import ClientValidator
+from src.models.user import User
 
 
 class Client(BaseModel):

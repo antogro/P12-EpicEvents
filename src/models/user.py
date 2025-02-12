@@ -78,7 +78,7 @@ class User(BaseModel):
         """
         try:
             UserValidator.validate_role(kwargs['role'])
-            UserValidator.validate_required_fields(kwargs)
+            UserValidator.validate_required_fields(**kwargs)
             if cls.get_object(session, email=kwargs['email']):
                 raise Exception("Un utilisateur avec cet email existe déjà")
             kwargs['password'] = cls.hash_password(kwargs['password'])
@@ -96,20 +96,26 @@ class User(BaseModel):
         """
         try:
             user = cls.get_object(session, id=user_id)
+
+            updates = {
+                key: value for key, value in kwargs.items()
+                if value is not None
+            }
+
             if not user:
                 raise Exception("L'utilisateur n'existe pas")
-            if 'email' in kwargs and user.email != kwargs['email']:
-                if cls.get_object(session, email=kwargs['email']):
+            if 'email' in updates and user.email != updates['email']:
+                if cls.get_object(session, email=updates['email']):
                     raise Exception(
                         "Un utilisateur avec cet email existe déjà"
                     )
-            if 'role' in kwargs:
-                UserValidator.validate_role(kwargs['role'])
+            if 'role' in updates:
+                UserValidator.validate_role(updates['role'])
 
-            if 'password' in kwargs:
-                kwargs['password'] = cls.hash_password(kwargs['password'])
+            if 'password' in updates:
+                updates['password'] = cls.hash_password(updates['password'])
 
-            for key, value in kwargs.items():
+            for key, value in updates.items():
 
                 if hasattr(user, key):
                     setattr(user, key, value)

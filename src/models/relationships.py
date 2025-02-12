@@ -2,11 +2,11 @@ from sqlalchemy.orm import relationship
 
 
 def setup_relationships():
-    from models.user import User
-    from models.client import Client
-    from models.contract import Contract
-    from models.event import Event
-    from moels.permissions import DynamicPermission, DynamicPermissionRule
+    from src.models.user import User
+    from src.models.client import Client
+    from src.models.contract import Contract
+    from src.models.event import Event
+    from src.models.permissions import DynamicPermission, DynamicPermissionRule
 
     # Relation entre un User et un client
     User.clients = relationship("Client", back_populates="commercial")

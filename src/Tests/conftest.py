@@ -4,8 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys
 import os
-
-
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 )
@@ -94,6 +92,7 @@ def contract_data():
         "commercial_id": 1,
         "total_amount": 1000,
         "remaining_amount": 1000,
+        "is_signed": True
     }
 
 

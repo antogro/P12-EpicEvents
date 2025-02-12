@@ -2,11 +2,6 @@ import typer
 from sqlalchemy import create_engine
 from typing import Optional
 from sqlalchemy.orm import sessionmaker
-import os
-import sys
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-)
 from models.user import User, UserRole
 from view.display_view import Display
 
@@ -16,7 +11,8 @@ Session = sessionmaker(bind=engine)
 display = Display()
 
 user_app = typer.Typer(name='Epic Events User Management',
-                       help='Application de Gestion des Utilisateurs Epic Event')
+                       help='Application de Gestion '
+                            'des Utilisateurs Epic Event')
 
 
 def get_session():
@@ -26,12 +22,12 @@ def get_session():
 
 @user_app.command(name="create")
 def create(
-    username: str = typer.Option(..., help="Nom d'utilisateur"),
-    email: str = typer.Option(..., help="Adresse e-mail"),
+    username: str = typer.Option(..., prompt=True, help="Nom d'utilisateur"),
+    email: str = typer.Option(..., prompt=True, help="Adresse e-mail"),
     password: str = typer.Option(
         ..., help="Mot de passe", prompt=True, hide_input=True),
     role: UserRole = typer.Option(
-        ..., help="Rôle d'utilisateur"),
+        ..., prompt=True, help="Rôle d'utilisateur"),
 ):
     """Crée un utilisateur dans la base de données"""
     try:
@@ -53,11 +49,14 @@ def create(
         session.close()
 
 
-@user_app.command(name='repport')
+@user_app.command(name='report')
 def user_repport(
     user_id: Optional[int] = typer.Option(
-        None, help="ID d'un utilisateur spécifique"),
-    role: Optional[UserRole] = typer.Option(None, help="Filtrer par rôle")
+        None, help="ID d'un utilisateur spécifique"
+    ),
+    role: Optional[UserRole] = typer.Option(
+        None, help="Filtrer par rôle"
+    )
 ):
     """
     Lister les utilisateurs
@@ -89,6 +88,35 @@ def user_repport(
             )
     except Exception as e:
         typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+    finally:
+        session.close()
+
+
+@user_app.command(name='update')
+def user_update(
+    id: int = typer.Option(
+        ..., prompt=True, help="ID de l'utilisateur à modifier"),
+    username: str = typer.Option(None, help="Nom d'utilisateur"),
+    email: str = typer.Option(None, help="Adresse email"),
+    role: Optional[UserRole] = typer.Option(
+        None, help="Nouveau rôle"
+        ),
+    password: Optional[str] = typer.Option(
+            None, help="Nouveau mot de passe")
+):
+    session = get_session()
+    try:
+        user = User.update_object(
+            session,
+            user_id=id,
+            username=username,
+            email=email,
+            role=role,
+            password=password
+            )
+        typer.secho(f"✅ Utilisateur '{user}' mise à jour")
+    except Exception as e:
+        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
         session.close()
 

@@ -2,22 +2,18 @@ import typer
 from sqlalchemy import create_engine
 from typing import Optional
 from sqlalchemy.orm import sessionmaker
-import os
-import sys
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-)
 from models.contract import Contract
-from models.user import User
-from models.client import Client
 from view.display_view import Display
+
 
 engine = create_engine('sqlite:///./epic_event.db')
 Session = sessionmaker(bind=engine)
 display = Display()
 
 contract_app = typer.Typer(name='Epic Events contract Management',
-                           help='Application de Gestion des Contrats Epic Event')
+                           help=['Application de Gestion '
+                                 'des Contrats Epic Event']
+                           )
 
 
 def get_session():
@@ -27,11 +23,12 @@ def get_session():
 
 @contract_app.command(name="create")
 def create(
-    client_id: int = typer.Option(..., help="ID de client"),
-    commercial_id: int = typer.Option(..., help="ID du commercial"),
-    total_amount: float = typer.Option(..., help="Montant Total"),
+    client_id: int = typer.Option(..., prompt=True, help="ID de client"),
+    commercial_id: int = typer.Option(
+        ..., prompt=True, help="ID du commercial"),
+    total_amount: float = typer.Option(..., prompt=True, help="Montant Total"),
     remaining_amount: float = typer.Option(
-        ..., help="Montant restant"),
+        ..., prompt=True, help="Montant restant"),
 ):
     """Crée un contrat dans la base de données"""
     try:
@@ -53,11 +50,15 @@ def create(
         session.close()
 
 
-@contract_app.command(name="repport")
+@contract_app.command(name="report")
 def contract_list(
-    client_id: Optional[int] = typer.Option(None, help="ID de client"),
-    id: Optional[int] = typer.Option(None, help="ID du contrat"),
-    is_signed: Optional[bool] = typer.Option(None, help="Contrats signés"),
+    client_id: Optional[int] = typer.Option(
+        None, help="ID de client"
+    ),
+    id: Optional[int] = typer.Option(
+        None, help="ID du contrat"),
+    is_signed: Optional[bool] = typer.Option(
+        None, help="Contrats signés"),
     contract_amount_left: Optional[bool] = typer.Option(
         None, help="Contrat pas entièrement payés"),
 ):
@@ -103,7 +104,8 @@ def contract_list(
 
 @contract_app.command(name="sign-contract")
 def sign_contract(
-        id: int = typer.Option(None, help="ID du contrat à signer"),
+        id: int = typer.Option(
+            ..., prompt=True, help="ID du contrat à signer"),
 ):
     typer.confirm("Validation de la signature du contrat ✅")
     session = get_session()
@@ -119,11 +121,16 @@ def sign_contract(
 @contract_app.command(name="payment")
 def payment(
     id: int = typer.Option(
-        None, help="ID du contrat pour lequel effectuer le paiement"),
+        None,
+        prompt=True,
+        help="ID du contrat pour lequel effectuer le paiement"
+    ),
     amount: float = typer.Option(
-        None, help="Montant du paiment pour le contrat"),
+        None, prompt=True, help="Montant du paiment pour le contrat"
+    ),
     change_total_amount: Optional[float] = typer.Option(
-        None, help="Montant total à payer pour le contrat"),
+        None, prompt=True, help="Montant total à payer pour le contrat"
+    ),
 ):
     typer.confirm("Validation de l'entrée du paiments  ✅")
     session = get_session()
@@ -143,7 +150,7 @@ def payment(
 
 @contract_app.command()
 def delete(
-    id: int = typer.Option(None, help="ID du contrat à supprimer")
+    id: int = typer.Option(None, prompt=True, help="ID du contrat à supprimer")
 ):
     typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
     session = get_session()

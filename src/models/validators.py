@@ -12,11 +12,8 @@ class UserValidator:
             )
 
     @staticmethod
-    def validate_required_fields(kwargs, for_creation=False):
+    def validate_required_fields(**kwargs):
         required_fields = ["username", "email", "role", "password"]
-        if for_creation:
-            required_fields.append("password")
-
         for field in required_fields:
             if field not in kwargs:
                 raise Exception(f"Le champ {field} est requis")
@@ -48,7 +45,6 @@ class ContractValidator:
                     "Le montant restant ne peut pas être "
                     "supérieur au montant total"
                 )
-
 
 class EventValidator:
     @staticmethod
