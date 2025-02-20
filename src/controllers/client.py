@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from models.client import Client
 from view.display_view import Display
+from src.models.permission import requires_permission, requires_login
 
 engine = create_engine("sqlite:///./epic_event.db")
 Session = sessionmaker(bind=engine)
@@ -21,19 +22,21 @@ def get_session():
 
 
 @client_app.command(name="create")
+@requires_permission("create_clients")
 def create_client(
-    first_name: str = typer.Option(
-        ..., prompt=True, help="Prénom du client"),
-    last_name: str = typer.Option(
-        ..., prompt=True, help="Nom de Famille du client"),
-    email: str = typer.Option(
-        ..., prompt=True, help="Adresse e-mail du client"),
-    phone: str = typer.Option(
-        ..., prompt=True, help="Numéro de téléphone du client"),
-    company_name: str = typer.Option(
-        ..., prompt=True, help="Nom de la compagnie"),
-    commercial_id: int = typer.Option(
-        ..., prompt=True, help="ID du commercial"),
+        ctx: typer.Context,
+        first_name: str = typer.Option(
+            ..., prompt=True, help="Prénom du client"),
+        last_name: str = typer.Option(
+            ..., prompt=True, help="Nom de Famille du client"),
+        email: str = typer.Option(
+            ..., prompt=True, help="Adresse e-mail du client"),
+        phone: str = typer.Option(
+            ..., prompt=True, help="Numéro de téléphone du client"),
+        company_name: str = typer.Option(
+            ..., prompt=True, help="Nom de la compagnie"),
+        commercial_id: int = typer.Option(
+            ..., prompt=True, help="ID du commercial"),
 ):
     """Crée un utilisateur dans la base de données"""
     try:
@@ -62,15 +65,17 @@ def create_client(
 
 
 @client_app.command(name="report")
+@requires_login()
 def client_list(
-    id: Optional[int] = typer.Option(
-        None,
-        help="ID du client pour afficher les détails"
-    ),
-    commercial_id: Optional[int] = typer.Option(
-        None,
-        help="ID du commercial pour afficher les clients",
-    ),
+        ctx: typer.Context,
+        id: Optional[int] = typer.Option(
+            None,
+            help="ID du client pour afficher les détails"
+        ),
+        commercial_id: Optional[int] = typer.Option(
+            None,
+            help="ID du commercial pour afficher les clients",
+        ),
 ):
     """Affiche la liste des clients"""
     session = get_session()
@@ -96,7 +101,7 @@ def client_list(
             else:
                 typer.secho("❌ Client non trouvé", fg=typer.colors.RED)
         else:
-            clients = Client.get_all_object(session, Client)
+            clients = Client.get_all_object(session)
             if commercial_id:
                 clients = [
                     client
@@ -130,22 +135,24 @@ def client_list(
 
 
 @client_app.command(name="update")
+@requires_permission("update_own_clients")
 def update_client(
-    id: Optional[int] = typer.Option(
-        None, help="ID du client pour afficher les détails"
-    ),
-    first_name: Optional[str] = typer.Option(
-        None, help="Prénom du client"),
-    last_name: Optional[str] = typer.Option(
-        None, help="Nom de Famille du client"),
-    email: Optional[str] = typer.Option(
-        None, help="Adresse e-mail du client"),
-    phone: Optional[str] = typer.Option(
-        None, help="Numéro de téléphone du client"),
-    company_name: Optional[str] = typer.Option(
-        None, help="Nom de la compagnie"),
-    commercial_id: Optional[int] = typer.Option(
-        None, help="ID du commercial"),
+        ctx: typer.Context,
+        id: Optional[int] = typer.Option(
+            None, help="ID du client pour afficher les détails"
+        ),
+        first_name: Optional[str] = typer.Option(
+            None, help="Prénom du client"),
+        last_name: Optional[str] = typer.Option(
+            None, help="Nom de Famille du client"),
+        email: Optional[str] = typer.Option(
+            None, help="Adresse e-mail du client"),
+        phone: Optional[str] = typer.Option(
+            None, help="Numéro de téléphone du client"),
+        company_name: Optional[str] = typer.Option(
+            None, help="Nom de la compagnie"),
+        commercial_id: Optional[int] = typer.Option(
+            None, help="ID du commercial"),
 ):
     """Mise à jour d'un client"""
     session = Session()
@@ -168,7 +175,10 @@ def update_client(
 
 
 @client_app.command()
-def delete(id: Optional[int] = typer.Option(
+@requires_permission("update_own_clients")
+def delete(
+        ctx: typer.Context,
+        id: Optional[int] = typer.Option(
         None, prompt=True, help="ID du client à supprimer")):
     typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
     session = get_session()

@@ -4,6 +4,8 @@ from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from models.user import User, UserRole
 from view.display_view import Display
+from models.permission import requires_permission
+from models.authentication import Token
 
 
 engine = create_engine('sqlite:///./epic_event.db')
@@ -21,7 +23,9 @@ def get_session():
 
 
 @user_app.command(name="create")
+@requires_permission("manage_users")
 def create(
+    ctx: typer.Context,
     username: str = typer.Option(..., prompt=True, help="Nom d'utilisateur"),
     email: str = typer.Option(..., prompt=True, help="Adresse e-mail"),
     password: str = typer.Option(
@@ -30,8 +34,9 @@ def create(
         ..., prompt=True, help="Rôle d'utilisateur"),
 ):
     """Crée un utilisateur dans la base de données"""
+    session = get_session()
     try:
-        session = get_session()
+        # Vérifie les permissions de l'utilisateur-
         user = User.create_object(
             session,
             username=username.replace("-", " "),
@@ -39,31 +44,33 @@ def create(
             password=password,
             role=role.value
         )
-        typer.secho(
-            f"✅ Utilisateur '{user.username}' créé avec succès !",
-        )
+        typer.secho(f"✅ Utilisateur '{user.username}' créé avec succès !")
     except Exception as e:
-        typer.secho(f"❌ Erreur lors de la création de l'utilisateur : "
-                    f"{str(e)}", fg=typer.colors.RED)
+        typer.secho(
+            f"❌ Erreur lors de la création de l'utilisateur : {str(e)}",
+            fg=typer.colors.RED
+        )
     finally:
         session.close()
 
 
 @user_app.command(name='report')
 def user_repport(
+    ctx: typer.Context,
     user_id: Optional[int] = typer.Option(
-        None, help="ID d'un utilisateur spécifique"
-    ),
-    role: Optional[UserRole] = typer.Option(
-        None, help="Filtrer par rôle"
-    )
+        None, help="ID d'un utilisateur spécifique"),
+    role: Optional[UserRole] = typer.Option(None, help="Filtrer par rôle")
 ):
-    """
-    Lister les utilisateurs
-    """
+    """Lister les utilisateurs"""
     session = get_session()
     headers = ["ID", "Username", "Email", "Role"]
     try:
+        if not Token.is_logged():
+            raise Exception(
+                "Vous devez être connecté pour accéder à cette fonctionnalité"
+            )
+            exit()
+        # Vérifie les permissions de l'utilisateur
         if user_id:
             user = User.get_object(session, id=user_id)
             if user:
@@ -71,9 +78,7 @@ def user_repport(
                     title="Détails de l'utilisateur:",
                     headers=headers,
                     items=[User.format_user_data(session, user)],
-
                 )
-
             else:
                 typer.secho("❌ Utilisateur non trouvé", fg=typer.colors.RED)
         else:
@@ -93,19 +98,22 @@ def user_repport(
 
 
 @user_app.command(name='update')
+@requires_permission("manage_users")
 def user_update(
+    ctx: typer.Context,
     id: int = typer.Option(
-        ..., prompt=True, help="ID de l'utilisateur à modifier"),
+        ..., prompt=True, help="ID de l'utilisateur à modifier"
+    ),
     username: str = typer.Option(None, help="Nom d'utilisateur"),
     email: str = typer.Option(None, help="Adresse email"),
-    role: Optional[UserRole] = typer.Option(
-        None, help="Nouveau rôle"
-        ),
-    password: Optional[str] = typer.Option(
-            None, help="Nouveau mot de passe")
+    role: Optional[UserRole] = typer.Option(None, help="Nouveau rôle"),
+    password: Optional[str] = typer.Option(None, help="Nouveau mot de passe")
 ):
+    """Mettre à jour les informations d'un utilisateur"""
     session = get_session()
     try:
+        # Vérifie les permissions de l'utilisateur
+
         user = User.update_object(
             session,
             user_id=id,
@@ -113,29 +121,37 @@ def user_update(
             email=email,
             role=role,
             password=password
-            )
-        typer.secho(f"✅ Utilisateur '{user}' mise à jour")
+        )
+        typer.secho(f"✅ Utilisateur '{user}' mis à jour")
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
         session.close()
 
 
+@requires_permission("manage_users")
 @user_app.command(name='delete')
 def delete(
-        user_id: int = typer.Option(...,
-                                    help="ID de l'utilisateur à supprimer"
-                                    )):
-    typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
-    session = get_session()
+    ctx: typer.Context,
+    user_id: int = typer.Option(..., help="ID de l'utilisateur à supprimer")
+):
+    """Supprimer un utilisateur"""
     try:
+        # Vérifie les permissions de l'utilisateur
+
+        typer.confirm(
+            "❓Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+            abort=True)
+        session = get_session()
         User.delete_object(session, user_id)
         typer.secho(
             f'✅ Utilisateur {user_id} supprimé avec succès',
-            fg=typer.colors.GREEN)
-
+            fg=typer.colors.GREEN
+        )
     except Exception as e:
         typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+    finally:
+        session.close()
 
 
 if __name__ == "__main__":

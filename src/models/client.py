@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from src.models.base import BaseModel
-from src.models.validators import ClientValidator
-from src.models.user import User
+from models.base import BaseModel
+from models.validators import ClientValidator
+from models.user import User
 
 
 class Client(BaseModel):
@@ -70,7 +70,17 @@ class Client(BaseModel):
     @classmethod
     def update_object(cls, session, client_id: int, **kwargs) -> 'Client':
         """
-        Met à jour un client sans écraser les valeurs existantes par None.
+        Met à jour un client
+        Utilisation : update_client(
+            session,
+            client_id,
+            first_name (str),
+            last_name (str),
+            email='email',
+            phone='phone',
+            compagy_name='company_name',
+            commercial_id='commercial_id'
+        )
         """
         try:
             client = cls.get_object(session, id=client_id)
@@ -82,13 +92,10 @@ class Client(BaseModel):
                 if value is not None
             }
 
-            # Vérification de l'email si fourni
             if 'email' in updates:
                 ClientValidator.validate_email(updates['email'])
                 if cls.get_object(session, email=updates['email']):
                     raise Exception("Un client avec cet email existe déjà")
-
-            # Vérification du commercial_id si fourni
             if 'commercial_id' in updates:
                 commercial = User.get_object(
                     session, id=updates['commercial_id']
@@ -96,15 +103,14 @@ class Client(BaseModel):
                 if not commercial or commercial.role != 'COMMERCIAL':
                     raise Exception("Contact commercial invalide")
 
-            # Mise à jour des attributs valides
             for key, value in updates.items():
-                setattr(client, key, value)
+                if hasattr(client, key):
+                    setattr(client, key, value)
 
             return cls._save_object(session, client)
-
         except Exception as e:
-            raise Exception(f"Une erreur lors de la mise à jour du client: "
-                            f"{str(e)}")
+            raise Exception(
+                f"Une erreur lors de la mise à jour du client: {str(e)}")
 
     @classmethod
     def delete_object(cls, session, client_id: int):

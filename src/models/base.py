@@ -11,9 +11,12 @@ class BaseModel(Base):
         return session.query(cls).filter_by(**kwargs).first()
 
     @classmethod
-    def get_all_object(cls, session, obj):
+    def get_all_object(cls, session, **filters):
         try:
-            return session.query(cls).all()
+            query = session.query(cls)
+            if filters:
+                query = query.filter_by(**filters)
+            return query.all()
         except Exception as e:
             raise Exception(
                 f'Erreur lors de la récupération: {str(e)}')

@@ -177,3 +177,5 @@ src/models/permission.py
 init_permissions.py
 verify_permissions.py
 
+src/config/token.txt
+epic_event.db

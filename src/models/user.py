@@ -36,7 +36,6 @@ class User(BaseModel):
     role = Column(String, nullable=False)
 
     __table_args__ = {'extend_existing': True}
-    __table_args__ = {'extend_existing': True}
 
     def __repr__(self):
         return f'User {self.username}'

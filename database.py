@@ -1,57 +1,77 @@
 from sqlalchemy import create_engine
-from src.models.relationships import setup_relationships
-from src.models.base import Base
 from sqlalchemy.orm import sessionmaker
-from src.models.permission import PermissionManager
+from src.models.base import Base
+from src.models.user import User
+from src.models.client import Client
+from src.models.contract import Contract
+from src.models.event import Event
+from src.models.permission import DynamicPermission, DynamicPermissionRule
+from src.models.relationships import setup_relationships
+from src.config.permission_rules import PermissionRule
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "epic_event.db")
+DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 
-def init_database(database_url="sqlite:///epic_event.db"):
-    """Initialise la base de données et crée toutes les tables"""
-    # Création du moteur de base de données
+def create_core_tables(engine):
+    """Créer les tables principales (User, Client, Contract, Event)"""
+    Base.metadata.create_all(engine, tables=[
+        User.__table__,
+        Client.__table__,
+        Contract.__table__,
+        Event.__table__,
+    ])
+
+
+def create_permission_tables(engine):
+    """Créer les tables des permissions après les autres"""
+    Base.metadata.create_all(engine, tables=[
+        DynamicPermission.__table__,
+        DynamicPermissionRule.__table__,
+    ])
+
+
+def init_database(database_url=DATABASE_URL):
+    """Initialisation en deux étapes : core tables puis permissions"""
     engine = create_engine(database_url)
+    setup_relationships()  # Assurer que les relations sont bien définies
 
-    # Configuration des relations
-    setup_relationships()
+    create_core_tables(engine)
+    create_permission_tables(engine)
 
-    # Création de toutes les tables
-    Base.metadata.create_all(engine)
+    return engine
 
 
-def init_permissions_and_rules(database_url="sqlite:///epic_event.db"):
-    """Initialize permissions and rules in the database"""
-    # Create database engine
-    engine = create_engine(database_url)
-
-    # Create session
+def init_permissions_and_rules(engine):
+    """Initialise les permissions et les règles dans la base de données"""
     Session = sessionmaker(bind=engine)
     session = Session()
 
     try:
-        # Initialize permissions
-        print("Initializing permissions...")
-        PermissionManager.initialize_permission(session)
+        PermissionRule.initialize_permission(session)
+        PermissionRule.initialize_rules(session)
         session.commit()
-        print("✅ Permissions initialized successfully!")
-
-        # Initialize rules
-        print("Initializing permission rules...")
-        PermissionManager.initialize_rules(session)
-        session.commit()
-        print("✅ Base de données initialisée avec succès!!")
-
     except Exception as e:
         session.rollback()
-        print(f"❌ Error during initialization: {str(e)}")
+        print("❌ Erreur lors de l'initialisation"
+              f" des permissions et règles: {str(e)}")
+        raise
     finally:
         session.close()
 
 
-if __name__ == "__main__":
+def main():
     try:
-        init_database()
-        print("✅ Base de données initialisée avec succès!")
-        init_permissions_and_rules()
+        print("🔄 Initialisation de la base de données et des permissions...")
+        engine = init_database()
+        init_permissions_and_rules(engine)
+        print("✅ Base de données et permissions initialisées avec succès!")
     except Exception as e:
-        print(
-            "❌ Erreur lors de l'initialisation "
-            f"de la base de données: {str(e)}")
+        print(f"❌ Erreur: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    main()

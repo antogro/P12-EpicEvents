@@ -6,7 +6,7 @@ def setup_relationships():
     from src.models.client import Client
     from src.models.contract import Contract
     from src.models.event import Event
-    from src.models.permissions import DynamicPermission, DynamicPermissionRule
+    from src.models.permission import DynamicPermission, DynamicPermissionRule
 
     # Relation entre un User et un client
     User.clients = relationship("Client", back_populates="commercial")

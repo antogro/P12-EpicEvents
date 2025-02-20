@@ -46,6 +46,7 @@ class ContractValidator:
                     "supérieur au montant total"
                 )
 
+
 class EventValidator:
     @staticmethod
     def validate_required_fields(**kwargs):

@@ -2,7 +2,8 @@ import typer
 from sqlalchemy import create_engine
 from typing import Optional
 from sqlalchemy.orm import sessionmaker
-from models.contract import Contract
+from src.models.contract import Contract
+from src.models.permission import requires_permission
 from view.display_view import Display
 
 
@@ -22,7 +23,9 @@ def get_session():
 
 
 @contract_app.command(name="create")
+@requires_permission("manage_all_contracts")
 def create(
+    ctx: typer.Context,
     client_id: int = typer.Option(..., prompt=True, help="ID de client"),
     commercial_id: int = typer.Option(
         ..., prompt=True, help="ID du commercial"),
@@ -52,6 +55,7 @@ def create(
 
 @contract_app.command(name="report")
 def contract_list(
+    ctx: typer.Context,
     client_id: Optional[int] = typer.Option(
         None, help="ID de client"
     ),
@@ -103,7 +107,9 @@ def contract_list(
 
 
 @contract_app.command(name="sign-contract")
+@requires_permission("manage_all_contracts", "update_own_contracts")
 def sign_contract(
+        ctx: typer.Context,
         id: int = typer.Option(
             ..., prompt=True, help="ID du contrat à signer"),
 ):
@@ -119,18 +125,20 @@ def sign_contract(
 
 
 @contract_app.command(name="payment")
+@requires_permission("update_own_contracts", "manage_all_contracts")
 def payment(
-    id: int = typer.Option(
-        None,
-        prompt=True,
-        help="ID du contrat pour lequel effectuer le paiement"
-    ),
-    amount: float = typer.Option(
-        None, prompt=True, help="Montant du paiment pour le contrat"
-    ),
-    change_total_amount: Optional[float] = typer.Option(
-        None, prompt=True, help="Montant total à payer pour le contrat"
-    ),
+        ctx: typer.Context,
+        id: int = typer.Option(
+            None,
+            prompt=True,
+            help="ID du contrat pour lequel effectuer le paiement"
+        ),
+        amount: float = typer.Option(
+            None, help="Montant du paiment pour le contrat"
+        ),
+        change_total_amount: Optional[float] = typer.Option(
+            None, help="Montant total à payer pour le contrat"
+        ),
 ):
     typer.confirm("Validation de l'entrée du paiments  ✅")
     session = get_session()
@@ -148,9 +156,12 @@ def payment(
         session.close()
 
 
-@contract_app.command()
+@contract_app.command(name="delete")
+@requires_permission("update_own_contracts", "manage_all_contracts")
 def delete(
-    id: int = typer.Option(None, prompt=True, help="ID du contrat à supprimer")
+        ctx: typer.Context,
+        id: int = typer.Option(
+            None, prompt=True, help="ID du contrat à supprimer")
 ):
     typer.confirm("❓Êtes vous sur de vouloir supprimer cet utilisateur ?")
     session = get_session()

@@ -1,9 +1,7 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from models.user import User
-from models.permission import PermissionManager
+from src.models.user import User
 import os
-from typer import Context
 
 
 SECRET_KEY = 'beautifull-amazing-secret-key'
@@ -101,44 +99,3 @@ class Token:
         token = Token.get_stored_token()
         if token and Token.verify_token(token):
             return True
-
-    def get_auth(ctx: Context):
-        try:
-            if not ctx.obj:
-                print("❌ Erreur : Contexte non initialisé.")
-                exit(1)
-
-            session = ctx.obj.get("session")
-            if not session:
-                print("❌ Erreur : Session SQLAlchemy non disponible.")
-                exit(1)
-
-            command: str | None = ctx.invoked_subcommand
-            if command in ["login", "logout"]:
-                return
-
-            if command == "report":
-                return
-
-            user_id = Token.ensure_authenticated().split("_")[0]
-
-            if not user_id:
-                exit()
-
-            # Vérifier les permissions de l'utilisateur
-            user = User.get_object(session, id=user_id)
-            permission_name = f"{ctx.info_name}_{command}"
-            if "user" in permission_name:
-                permission_name = "user"
-
-            has_permission = PermissionManager.validate_permission(
-                session, user, permission_name, return_error=True)
-            print(has_permission)
-            if not has_permission:
-                print("❌ Accès refusé : Vous n'avez pas"
-                      " la permission d'exécuter cette commande.")
-                exit(1)
-
-        except Exception as e:
-            print(f"❌ Erreur lors de l'authentification : {e}")
-            exit(1)
