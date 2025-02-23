@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from src.models.contract import Contract
-from src.models.permission import requires_permission
+from src.models.permission import requires_permission, requires_login
 from view.display_view import Display
 
 
@@ -47,13 +47,14 @@ def create(
             f"✅ Contrat n°'{contract.client_id}' créé avec succès !",
         )
     except Exception as e:
-        typer.secho(f"❌ Erreur lors de la création du contrat : "
-                    f"{str(e)}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
     finally:
         session.close()
 
 
 @contract_app.command(name="report")
+@requires_login()
 def contract_list(
     ctx: typer.Context,
     client_id: Optional[int] = typer.Option(
@@ -101,12 +102,13 @@ def contract_list(
                 ]
         )
     except Exception as e:
-        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
     finally:
         session.close()
 
 
-@contract_app.command(name="sign-contract")
+@contract_app.command(name="sign")
 @requires_permission("manage_all_contracts", "update_own_contracts")
 def sign_contract(
         ctx: typer.Context,
@@ -121,7 +123,8 @@ def sign_contract(
             f"✅ Contrat n°'{id}' signé avec succès !",
         )
     except Exception as e:
-        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
 
 
 @contract_app.command(name="payment")
@@ -151,7 +154,8 @@ def payment(
         )
         typer.secho(f"✅ Paiement du contrat n°'{id}' effect")
     except Exception as e:
-        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
     finally:
         session.close()
 

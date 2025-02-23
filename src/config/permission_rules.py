@@ -130,23 +130,8 @@ class PermissionRule:
                 "error_message":
                     "Vous ne pouvez modifier que les contrats de vos clients",
             },
-            {
-                "permission_name": "view_filtered_contracts",
-                "attribute": "user.role",
-                "operator": "==",
-                "value": "COMMERCIAL",
-                "error_message":
-                    "Seuls les commerciaux peuvent filtrer les contrats",
-            },
             # Règles pour l'équipe support
-            {
-                "permission_name": "view_own_events",
-                "attribute": "user.role",
-                "operator": "==",
-                "value": "SUPPORT",
-                "error_message":
-                    "Seule l'équipe support peut filtrer ses événements",
-            },
+
             {
                 "permission_name": "update_own_events",
                 "attribute": "event.support_contact_id",
@@ -160,10 +145,10 @@ class PermissionRule:
                 "permission_name": "create_event",
                 "attribute": "user.role",
                 "operator": "==",
-                "value": "GESTION",
+                "value": "COMMERCIAL",
                 "error_message":
-                    "Seul un gestionnaire peut créer un "
-                    "événement pour n'importe quel client.",
+                    "Seul un commercial peut créer un "
+                    "événement pour un contrat dument signé.",
             },
             # Un commercial peut créer un événement UNIQUEMENT pour ses
             # propres clients avec un contrat signé

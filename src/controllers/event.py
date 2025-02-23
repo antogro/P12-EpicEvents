@@ -4,8 +4,7 @@ from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from models.event import Event
 from view.display_view import Display
-from models.authentication import Token
-from models.permission import requires_permission
+from models.permission import requires_permission, requires_login
 from models.contract import Contract
 from models.user_session import UserSession
 
@@ -62,19 +61,19 @@ def create(
         contrat = Contract.get_object(session, id=contract_id)
 
         if not contrat:
-            raise Exception("❌ Le contrat spécifié n'existe pas.")
+            raise Exception(" Le contrat spécifié n'existe pas.")
 
         # Vérifier que le contrat a bien un commercial_id
         if contrat.commercial_id is None:
-            raise Exception("❌ Le contrat ne possède "
+            raise Exception(" Le contrat ne possède "
                             "pas de commercial associé.")
 
         # Vérifier que le contrat appartient au commercial connecté
         current_user = UserSession.get_current_user(ctx)
 
         if contrat.commercial_id != current_user.id:
-            raise Exception("❌ Vous ne pouvez créer un événement "
-                            "que pour vos propres clients.")
+            raise Exception("\n Seul le commercial responsable du client "
+                            "peut créer un événement.")
 
         event = Event.create_object(
             session,
@@ -93,7 +92,7 @@ def create(
         )
     except Exception as e:
         typer.secho(
-            f"❌ Erreur lors de la création de l'évènement : " f"{str(e)}",
+            f"❌{str(e)}",
             fg=typer.colors.RED,
         )
     finally:
@@ -101,22 +100,16 @@ def create(
 
 
 @event_app.command(name="report")
+@requires_login()
 def event_report(
         ctx: typer.Context,
-        client_id: Optional[int] = typer.Option(
-            None, help="ID du client associé"
-        ),
-        id: Optional[int] = typer.Option(
-            None, help="ID de l'évenement"
-        ),
-        support_contact_id: Optional[int] = typer.Option(
-            None, help="ID du support associé"
-        ),
-        contract_id: Optional[int] = typer.Option(
-            None, help="ID du contrat associé"
-        )
+        client_id: Optional[int] = typer.Option(None, help="ID du client associé"),
+        id: Optional[int] = typer.Option(None, help="ID de l'événement"),
+        support_contact_id: Optional[int] = typer.Option(None, help="ID du support associé"),
+        contract_id: Optional[int] = typer.Option(None, help="ID du contrat associé"),
+        unassigned_only: bool = typer.Option(False, help="Afficher uniquement les événements sans support")  # Ajout du filtre
 ):
-    """Affiche les détails d'un événement"""
+    """Affiche les détails d'un événement avec option de filtrage pour événements non assignés."""
     event_headers = [
         "ID de l'Evènement",
         "ID du support",
@@ -131,31 +124,28 @@ def event_report(
         "Mise à jour le",
         "Notes",
     ]
+
     session = get_session()
     try:
-        if not Token.is_logged():
-            raise Exception("Vous devez être connecté"
-                            " pour accéder à cette fonctionnalité")
-            exit()
         events = get_filtered_events(
-            session, client_id, id, support_contact_id, contract_id
+            session, client_id, id, support_contact_id, contract_id, unassigned_only
         )
+
         if not events:
             typer.secho("❌ Aucun évènement trouvé", fg=typer.colors.RED)
             return
 
-        # Affichage du tableau des contrats
+        # Affichage du tableau des événements
         display.table(
-            title="Liste des Evènement",
+            title="Liste des Événements",
             headers=event_headers,
-            items=[
-                Event.format_event_data(session, event) for event in events
-            ],
+            items=[Event.format_event_data(session, event) for event in events],
         )
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
         session.close()
+
 
 
 @event_app.command(name="update")
@@ -224,23 +214,24 @@ def get_filtered_events(
     event_id=None,
     support_contact_id=None,
     contract_id=None,
+    unassigned_only=False  # Ajout de l'option de filtrage
 ):
     """
-    Récupère les contrats filtrés en fonction des paramètres fournis.
+    Récupère les événements filtrés en fonction des paramètres fournis.
     """
-    events = Event.get_all_object(session, Event)
+    events = Event.get_all_object(session)
+
     if client_id:
         events = [event for event in events if event.client_id == client_id]
-    elif event_id:
+    if event_id:
         events = [event for event in events if event.id == event_id]
-    elif support_contact_id:
+    if support_contact_id:
         events = [
-            event for event in events if
-            event.support_contact_id == support_contact_id
+            event for event in events if event.support_contact_id == support_contact_id
         ]
-    elif contract_id:
-        events = [
-            event for event in events if event.contract_id == contract_id]
-    else:
-        events = Event.get_all_object(session, Event)
+    if contract_id:
+        events = [event for event in events if event.contract_id == contract_id]
+    if unassigned_only:
+        events = [event for event in events if event.support_contact_id is None]
+
     return events

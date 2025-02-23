@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float, Boolean
 from models.base import BaseModel
 from models.validators import ContractValidator
 from models.user import User
+from config.sentry_base import logger
 
 
 class Contract(BaseModel):
@@ -53,7 +54,7 @@ class Contract(BaseModel):
             return cls._save_object(session, cls(**kwargs))
         except Exception as e:
             raise Exception(
-                f"Une erreur lors de la mise à jour du contrat: {str(e)}")
+                f" Erreur lors de la création du contrat : {str(e)}")
 
     @classmethod
     def update_object(cls, session, contract_id, **kwargs):
@@ -114,10 +115,15 @@ class Contract(BaseModel):
                 raise Exception("Le contrat n'existe pas")
 
             contract.is_signed = True
+            logger.info(
+                f"Contrat ID {contract_id} "
+                f"ID du comemrcial : {contract.commercial_id}")
             return cls._save_object(session, contract)
         except Exception as e:
+            logger.error(f"Erreur lors de la signature du contrat "
+                         f"{contract_id}: {str(e)}")
             raise Exception(
-                f"Une erreur lors de la mise à jour du contrat: {str(e)}")
+                f"Une erreur lors de la signature du contrat: {str(e)}")
 
     @classmethod
     def delete_object(cls, session, contract_id):

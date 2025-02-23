@@ -92,7 +92,6 @@ class PermissionManager:
 
         return getattr(obj, attr, attribute_path) if obj else attribute_path
 
-
     @classmethod
     def _get_object_by_type(cls, session, obj_type, obj_id):
         """Récupère un objet en fonction de son type"""

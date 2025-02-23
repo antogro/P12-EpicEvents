@@ -4,6 +4,7 @@ from models.base import BaseModel
 from models.validators import UserValidator
 import hashlib
 import os
+from config.sentry_base import logger
 from enum import Enum
 
 
@@ -31,7 +32,6 @@ class User(BaseModel):
     username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(timezone.utc))
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     role = Column(String, nullable=False)
 
@@ -81,10 +81,14 @@ class User(BaseModel):
             if cls.get_object(session, email=kwargs['email']):
                 raise Exception("Un utilisateur avec cet email existe déjà")
             kwargs['password'] = cls.hash_password(kwargs['password'])
+            logger.info(
+                f"Utilisateur '{kwargs["username"]}' créé avec succès")
             return cls._save_object(session, cls(**kwargs))
         except Exception as e:
+            logger.error("Erreur lors de la création de l'utilisateur "
+                         f"'{kwargs["username"]}': {str(e)}")
             raise Exception(f'Erreur lors de la création'
-                            f'de l\'utilisateur : {str(e)}')
+                            f' de l\'utilisateur : {str(e)}')
 
     @classmethod
     def update_object(cls, session, user_id, **kwargs):
@@ -115,12 +119,14 @@ class User(BaseModel):
                 updates['password'] = cls.hash_password(updates['password'])
 
             for key, value in updates.items():
-
-                if hasattr(user, key):
+                if hasattr(user, key) and value is not None:
                     setattr(user, key, value)
+            logger.info(f" Utilisateur '{user.username}' mis à jour")
             return cls._save_object(session, user)
         except Exception as e:
             session.rollback()
+            logger.error("Erreur lors de la mise à jour de l'utilisateur "
+                         f"'{id}': {str(e)}")
             raise Exception(
                 f"Erreur lors de la mise à jour de l'utilisateur: {str(e)}"
             )

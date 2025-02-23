@@ -17,7 +17,7 @@ class UserSession:
                       "pas disponible dans le contexte.")
                 exit(1)
 
-            session = ctx.obj["session"]  # Récupère la session SQLAlchemy
+            session = ctx.obj["session"]
 
             token = Token.get_stored_token()
             if token:

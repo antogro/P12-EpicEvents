@@ -57,7 +57,7 @@ def create_client(
         )
     except Exception as e:
         typer.secho(
-            f"❌ Erreur lors de la création du client : {str(e)}",
+            f"❌ {str(e)}",
             fg=typer.colors.RED
         )
     finally:
@@ -186,7 +186,7 @@ def delete(
         Client.delete_object(session, id)
         typer.secho(f"Client {id} supprimé avec succès", fg=typer.colors.GREEN)
     except Exception as e:
-        typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+        typer.secho(f"❌{str(e)}", fg=typer.colors.RED)
 
 
 if __name__ == "__main__":

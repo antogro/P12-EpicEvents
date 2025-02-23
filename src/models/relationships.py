@@ -28,6 +28,7 @@ def setup_relationships():
         "User", back_populates="events_support"
     )
 
+    # Relation entre un event et un client
     Client.event_id = relationship(
         "Event", back_populates="client_id"
     )
@@ -35,6 +36,7 @@ def setup_relationships():
         "Client", back_populates="event_id"
     )
 
+    # Relation entre les permissions et les régles
     DynamicPermission.rules = relationship(
         "DynamicPermissionRule",
         back_populates="permission",

@@ -22,18 +22,18 @@ def get_session():
 
 @auth_app.command(name="login")
 def login(
-    username: str = typer.Option(
-        ..., prompt=True, help="Username"),
-    password: str = typer.Option(
-        ..., prompt=True, hide_input=True, help="Password",
-    ),
+        username: str = typer.Option(
+            ..., prompt=True, help="Username"),
+        password: str = typer.Option(
+            ..., prompt=True, hide_input=True, help="Password",
+        ),
 ):
     """Login to the application"""
     try:
         session = get_session()
         token = Token.login(session, username, password=password)
         if token:
-            print(token)
+            typer.secho(f'{username} connecté avec succé')
 
     except Exception as e:
         print(f"Error: {e}")@auth_app.command(name="login")

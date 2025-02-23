@@ -2,12 +2,14 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from src.models.user import User
 import os
+from dotenv import load_dotenv
+from pathlib import Path
 
+TOKEN_STORAGE_PATH = Path.home() / ".epic_token"
 
-SECRET_KEY = 'beautifull-amazing-secret-key'
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-
-# 1 hour in seconds
 TOKEN_EXPIRATION = 3600
 TOKEN_FILE = "src/config/token.txt"
 
@@ -40,27 +42,41 @@ class Token:
         }
 
     def save_token(token: str):
-        """Stocke le token JWT dans un fichier"""
-        with open(TOKEN_FILE, "w") as file:
+        """Stocke le token JWT dans un fichier temporaire"""
+        with open(TOKEN_STORAGE_PATH, "w") as file:
             file.write(token)
 
     def get_stored_token():
         """Récupère le token stocké, s'il existe"""
-        if os.path.exists(TOKEN_FILE):
-            with open(TOKEN_FILE, "r") as file:
+        if TOKEN_STORAGE_PATH.exists():
+            with open(TOKEN_STORAGE_PATH, "r") as file:
                 return file.read().strip()
         return None
 
     def verify_token(token):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            exp = payload.get("exp")
-            if exp and datetime.fromtimestamp(
-                    exp, timezone.utc) < datetime.now(timezone.utc):
+            exp_timestamp = payload.get("exp")
+            iat_timestamp = payload.get("iat")
+
+            # Conversion des timestamps en format lisible
+            exp_time = datetime.fromtimestamp(
+                exp_timestamp, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+            iat_time = datetime.fromtimestamp(
+                iat_timestamp, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+            # Vérification si le token est expiré
+            if exp_timestamp and datetime.fromtimestamp(
+                    exp_timestamp, timezone.utc) < datetime.now(timezone.utc):
                 print("⚠️ Token expiré. Veuillez vous reconnecter.")
                 Token.clear_stored_token()
                 return False
+
+            print(f"✅ Token '{payload['sub']}' valide !")
+            print(f"📅 Émis le : {iat_time}")
+            print(f"⏳ Expire le : {exp_time}")
             return payload
+
         except jwt.ExpiredSignatureError:
             print("⚠️ Token expiré. Veuillez vous reconnecter.")
             Token.clear_stored_token()
@@ -72,8 +88,8 @@ class Token:
 
     def clear_stored_token():
         """Supprime le token stocké si invalide ou expiré"""
-        if os.path.exists(TOKEN_FILE):
-            os.remove(TOKEN_FILE)
+        if TOKEN_STORAGE_PATH.exists():
+            TOKEN_STORAGE_PATH.unlink()
 
     def ensure_authenticated():
         """Vérifie que l'utilisateur est authentifié

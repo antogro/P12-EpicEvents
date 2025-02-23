@@ -4,8 +4,8 @@ from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from models.user import User, UserRole
 from view.display_view import Display
-from models.permission import requires_permission
-from models.authentication import Token
+from sentry_sdk import capture_exception
+from models.permission import requires_permission, requires_login
 
 
 engine = create_engine('sqlite:///./epic_event.db')
@@ -55,6 +55,7 @@ def create(
 
 
 @user_app.command(name='report')
+@requires_login()
 def user_repport(
     ctx: typer.Context,
     user_id: Optional[int] = typer.Option(
@@ -65,12 +66,6 @@ def user_repport(
     session = get_session()
     headers = ["ID", "Username", "Email", "Role"]
     try:
-        if not Token.is_logged():
-            raise Exception(
-                "Vous devez être connecté pour accéder à cette fonctionnalité"
-            )
-            exit()
-        # Vérifie les permissions de l'utilisateur
         if user_id:
             user = User.get_object(session, id=user_id)
             if user:
@@ -92,7 +87,8 @@ def user_repport(
                 headers=headers,
             )
     except Exception as e:
-        typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
     finally:
         session.close()
 
@@ -124,13 +120,14 @@ def user_update(
         )
         typer.secho(f"✅ Utilisateur '{user}' mis à jour")
     except Exception as e:
-        typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
     finally:
         session.close()
 
 
-@requires_permission("manage_users")
 @user_app.command(name='delete')
+@requires_permission("manage_users")
 def delete(
     ctx: typer.Context,
     user_id: int = typer.Option(..., help="ID de l'utilisateur à supprimer")
@@ -149,7 +146,9 @@ def delete(
             fg=typer.colors.GREEN
         )
     except Exception as e:
-        typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+        typer.secho(
+                    f"\n ❌ {str(e)}", fg=typer.colors.RED)
+        capture_exception(e)
     finally:
         session.close()
 
