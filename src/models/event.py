@@ -75,9 +75,11 @@ class Event(BaseModel):
                 kwargs['start_date'])
             kwargs['end_date'] = DateTimeUtils.parse_date(kwargs['end_date'])
 
-            contrat = Contract.get_object(session, id=kwargs['contract_id'])
-            if not contrat or not contrat.is_signed:
-                raise Exception("Le contrat n'existe pas ou n'est pas signé.")
+            contract = Contract.get_object(session, id=kwargs['contract_id'])
+            if not contract:
+                raise Exception("Le contrat n'existe pas.")
+            if not contract.is_signed:
+                raise Exception("Le contrat n'est pas signé.")
 
             if 'support_contact_id' in kwargs and kwargs['support_contact_id']:
                 support_contact = User.get_object(

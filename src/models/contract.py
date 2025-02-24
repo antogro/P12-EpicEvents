@@ -92,13 +92,17 @@ class Contract(BaseModel):
             if not contract:
                 raise Exception("Le contrat n'existe pas")
 
-            ContractValidator.validate_amounts(
-                kwargs["total_amount"], kwargs["remaining_amount"]
-            )
-            contract.remaining_amount = kwargs["remaining_amount"]
-            if kwargs['total_amount']:
-                contract.total_amount = kwargs['total_amount']
+            total_amount = kwargs.get(
+                "total_amount", contract.total_amount)
+            remaining_amount = kwargs.get(
+                "remaining_amount", contract.remaining_amount)
+
+            ContractValidator.validate_amounts(total_amount, remaining_amount)
+
+            contract.remaining_amount = remaining_amount
+            contract.total_amount = total_amount
             return cls._save_object(session, contract)
+
         except Exception as e:
             raise Exception(
                 f"Une erreur lors de la mise à jour du contrat: {str(e)}")
@@ -116,8 +120,8 @@ class Contract(BaseModel):
 
             contract.is_signed = True
             logger.info(
-                f"Contrat ID {contract_id} "
-                f"ID du comemrcial : {contract.commercial_id}")
+                f"Contrat ID {contract_id}."
+                f"\n ID du commrcial : {contract.commercial_id}")
             return cls._save_object(session, contract)
         except Exception as e:
             logger.error(f"Erreur lors de la signature du contrat "

@@ -38,8 +38,9 @@ def user_data_commercial():
         role: Gestion
     """
     return {
+        "id": 1,
         "email": "test_user@test.fr",
-        "username": "username",
+        "username": "usernam",
         "password": "password",
         "role": "COMMERCIAL",
     }
@@ -63,6 +64,7 @@ def client_data():
         role: Commercial
     """
     return {
+        "id": 1,
         "first_name": "full_name",
         "last_name": "full_name",
         "email": "email@email.fr",
@@ -88,6 +90,7 @@ def contract_data():
     Fixture pour les données de test d'un contrat
     """
     return {
+        "id": 1,
         "client_id": 1,
         "commercial_id": 1,
         "total_amount": 1000,
