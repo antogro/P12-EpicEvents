@@ -18,8 +18,16 @@ user_app = typer.Typer(name='Epic Events User Management',
 
 
 def get_session():
-    """Récupère une session de la base de données"""
-    return Session()
+    """Récupère une session SQLAlchemy active"""
+    try:
+        session = Session()
+        print("⚠️ get_session() appelé")
+        print(f"get_session() called in {__name__}")  # ✅ Voir l'import réel
+        return session
+    except Exception as e:
+        typer.secho("❌ Erreur : Impossible d'initialiser "
+                    f"la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @user_app.command(name="create")
@@ -50,6 +58,7 @@ def create(
             f"❌ Erreur lors de la création de l'utilisateur : {str(e)}",
             fg=typer.colors.RED
         )
+        raise typer.Exit(code=1)
     finally:
         session.close()
 

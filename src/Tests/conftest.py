@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
+from unittest.mock import MagicMock
 from sqlalchemy.orm import sessionmaker
 import sys
 import os
@@ -8,6 +9,13 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 )
 from models.base import Base
+
+
+@pytest.fixture
+def mock_session(mocker):
+    session_mock = mocker.MagicMock()
+    mocker.patch("src.controllers.user.get_session", return_value=session_mock)
+    return session_mock
 
 
 @pytest.fixture(scope='module')

@@ -20,8 +20,14 @@ event_app = typer.Typer(
 
 
 def get_session():
-    """Récupère une session de la base de données"""
-    return Session()
+    """Récupère une session SQLAlchemy active"""
+    try:
+        session = Session()
+        return session
+    except Exception as e:
+        typer.secho("❌ Erreur : Impossible d'initialiser"
+                    f" la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @event_app.command(name="create")
@@ -103,13 +109,21 @@ def create(
 @requires_login()
 def event_report(
         ctx: typer.Context,
-        client_id: Optional[int] = typer.Option(None, help="ID du client associé"),
-        id: Optional[int] = typer.Option(None, help="ID de l'événement"),
-        support_contact_id: Optional[int] = typer.Option(None, help="ID du support associé"),
-        contract_id: Optional[int] = typer.Option(None, help="ID du contrat associé"),
-        unassigned_only: bool = typer.Option(False, help="Afficher uniquement les événements sans support")  # Ajout du filtre
+        client_id: Optional[int] = typer.Option(
+            None, help="ID du client associé"),
+        id: Optional[int] = typer.Option(
+            None, help="ID de l'événement"),
+        support_contact_id: Optional[int] = typer.Option(
+            None, help="ID du support associé"),
+        contract_id: Optional[int] = typer.Option(
+            None, help="ID du contrat associé"),
+        unassigned_only: bool = typer.Option(
+            False, help="Afficher uniquement les événements sans support")
 ):
-    """Affiche les détails d'un événement avec option de filtrage pour événements non assignés."""
+    """
+    Affiche les détails d'un événement avec
+    option de filtrage pour événements non assignés.
+    """
     event_headers = [
         "ID de l'Evènement",
         "ID du support",
@@ -128,7 +142,8 @@ def event_report(
     session = get_session()
     try:
         events = get_filtered_events(
-            session, client_id, id, support_contact_id, contract_id, unassigned_only
+            session, client_id, id, support_contact_id,
+            contract_id, unassigned_only
         )
 
         if not events:
@@ -139,13 +154,12 @@ def event_report(
         display.table(
             title="Liste des Événements",
             headers=event_headers,
-            items=[Event.format_event_data(session, event) for event in events],
+            items=[Event.format_event_data(session, event) for event in events]
         )
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
     finally:
         session.close()
-
 
 
 @event_app.command(name="update")
@@ -227,11 +241,16 @@ def get_filtered_events(
         events = [event for event in events if event.id == event_id]
     if support_contact_id:
         events = [
-            event for event in events if event.support_contact_id == support_contact_id
+            event for event in events if
+            event.support_contact_id == support_contact_id
         ]
     if contract_id:
-        events = [event for event in events if event.contract_id == contract_id]
+        events = [
+            event for event in events if
+            event.contract_id == contract_id]
     if unassigned_only:
-        events = [event for event in events if event.support_contact_id is None]
+        events = [
+            event for event in events if
+            event.support_contact_id is None]
 
     return events

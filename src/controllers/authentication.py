@@ -16,8 +16,14 @@ auth_app = typer.Typer(name='Epic Events authentication Management',
 
 
 def get_session():
-    """Récupère une session de la base de données"""
-    return Session()
+    """Récupère une session SQLAlchemy active"""
+    try:
+        session = Session()
+        return session
+    except Exception as e:
+        typer.secho("❌ Erreur : Impossible d'initialiser "
+                    f"la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @auth_app.command(name="login")
@@ -25,31 +31,34 @@ def login(
         username: str = typer.Option(
             ..., prompt=True, help="Username"),
         password: str = typer.Option(
-            ..., prompt=True, hide_input=True, help="Password",
-        ),
+            ..., prompt=True, hide_input=True, help="Password"),
 ):
-    """Login to the application"""
+    """Connexion à l'application"""
     try:
         session = get_session()
         token = Token.login(session, username, password=password)
         if token:
-            typer.secho(f'{username} connecté avec succé')
-
+            typer.secho(
+                f"✅ {username} connecté avec succès", fg=typer.colors.GREEN)
+        else:
+            typer.secho("❌ Identifiants invalides", fg=typer.colors.RED)
+            raise typer.Exit(code=1)
     except Exception as e:
-        print(f"Error: {e}")@auth_app.command(name="login")
+        typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @auth_app.command(name="verify-token")
-def verify_token(
-):
-    """Login to the application"""
+def verify_token():
+    """Vérifie le token de l'utilisateur"""
     try:
         token = Token.verify_token(Token.get_stored_token())
         if token:
-            print(token)
-
+            typer.secho(
+                f"✅ Token '{token['sub']}' valide !", fg=typer.colors.GREEN)
     except Exception as e:
-        print(f"Error: {e}")
+        typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @auth_app.command(name="logout")
@@ -57,5 +66,6 @@ def logout():
     """Login to the application"""
     try:
         Token.logout()
+        typer.secho("✅ Déconnexion réussie", fg=typer.colors.GREEN)
     except Exception as e:
         print(f"Error: {e}")

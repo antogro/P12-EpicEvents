@@ -18,8 +18,14 @@ contract_app = typer.Typer(name='Epic Events contract Management',
 
 
 def get_session():
-    """Récupère une session de la base de données"""
-    return Session()
+    """Récupère une session SQLAlchemy active"""
+    try:
+        session = Session()
+        return session
+    except Exception as e:
+        typer.secho("❌ Erreur : Impossible d'initialiser "
+                    f"la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
 @contract_app.command(name="create")
