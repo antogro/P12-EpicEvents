@@ -1,124 +1,146 @@
-# 📘 Projet : EpicEvent - CRM pour la Gestion d'Événements
+## 📚 **EpicEvent - CRM pour la Gestion d'Événements**  
 
-## 📌 **Présentation du Projet**
-Epic Events est une entreprise spécialisée dans l'organisation d'événements. Ce projet CRM a pour but de **faciliter la gestion des clients, contrats et événements**, tout en assurant un contrôle des accès par rôles.
+### 🎯 **Présentation du Projet**  
+EpicEvent est un CRM conçu pour **gérer les clients, contrats et événements**, tout en assurant une **gestion stricte des permissions** selon les rôles utilisateurs.  
 
-L'architecture du projet repose sur **Python 3.9+**, **SQLAlchemy** pour la gestion de la base de données, et **Typer** pour l'interface en ligne de commande (CLI). 
-
-Le projet est divisé en trois modules principaux :
-- **Gestion des utilisateurs et permissions**
-- **Gestion des clients et contrats**
-- **Organisation des événements**
+🔹 **Technologies utilisées** :  
+- **Python 3.9+**  
+- **SQLAlchemy** *(ORM pour base de données)*  
+- **Typer** *(Interface CLI)*  
+- **SQLite** *(Base de données locale)*  
+- **pytest** *(Tests unitaires)*  
+- **Sentry** *(Gestion des erreurs et logs)*  
 
 ---
 
-## 📌 **Installation et Configuration**
+## ⚡ **Installation et Configuration**  
 
-### ✅ **1. Cloner le Dépôt**
-Si le projet est sur GitHub :
+### ✅ **1. Cloner le Dépôt**  
+Si le projet est sur GitHub :  
 ```sh
-git clone https://github.com/ton-repo/epicevent.git
-cd epicevent
-```
+git clone https://github.com/antogro/P12-EpicEvents.git
+cd EpicEvents
+```  
 
 Si tu n’utilises pas Git, télécharge l’archive et extraits les fichiers.
 
-### ✅ **2. Créer et Activer un Environnement Virtuel**
-**Sous Windows :**
+### ✅ **2. Créer et Activer un Environnement Virtuel**  
+**Sous Windows :**  
 ```sh
-python -m venv venv
+python -m venv .venv
 venv\Scripts\activate
-```
+```  
 
-**Sous macOS/Linux :**
+**Sous macOS/Linux :**  
 ```sh
-python3 -m venv venv
+python3 -m venv .venv
 source venv/bin/activate
-```
+```  
 
-### ✅ **3. Installer les Dépendances**
+### ✅ **3. Installer les Dépendances**  
 ```sh
 pip install -r requirements.txt
-```
+```  
 
-### ✅ **4. Initialiser la Base de Données**
+### ✅ **4. Configuration du Projet**  
+Créer un fichier **`.env`** et ajouter les variables nécessaires :  
+```ini
+SECRET_KEY=your_secret_key_here
+DATABASE_URL=sqlite:///epic_event.db
+TOKEN_EXPIRATION=3600
+```  
+
+### ✅ **5. Initialiser la Base de Données**  
 ```sh
-python main.py db init
-python main.py db migrate
-python main.py db upgrade
-```
+python database.py
+```  
 
-### ✅ **5. Lancer l’Application**
+### ✅ **6. Lancer l’Application**  
 ```sh
 python main.py
-```
+```  
 
-### ✅ **6. Exécuter les Tests Unitaires**
+### ✅ **7. Exécuter les Tests Unitaires**  
 ```sh
 pytest -v
-```
+```  
 
 ---
 
-## 📌 **Commandes Disponibles**
+## 🔐 **Gestion des Utilisateurs et Permissions**  
 
-### 🔹 **Gestion des Utilisateurs**
-```sh
-python main.py user create --username admin --email admin@example.com --password admin123 --role GESTION
-```
+EpicEvent applique un **contrôle d'accès strict** basé sur trois rôles :  
+| Rôle       | Droits |
+|------------|------------------------------------------------|
+| **GESTION** | Gestion des utilisateurs, des contrats et des événements |
+| **COMMERCIAL** | Création et gestion des clients, contrats et événements |
+| **SUPPORT** | Gestion des événements qui leur sont attribués |
 
-### 🔹 **Gestion des Clients**
-```sh
-python main.py client create --first-name John --last-name Doe --email john@example.com --phone 123456789 --company-name Startup
-```
-
-### 🔹 **Gestion des Contrats**
-```sh
-python main.py contract create --client-id 1 --total-amount 5000 --remaining-amount 2500
-```
-
-### 🔹 **Gestion des Événements**
-```sh
-python main.py event create --client-id 1 --contract-id 1 --name "Réunion annuelle" --start-date "2024-06-01_10:00:00" --end-date "2024-06-01_12:00:00" --location "Paris"
-```
+📌 **Principaux droits par rôle** :  
+✅ **GESTION** : Peut créer/modifier/supprimer tout utilisateur, contrat ou événement.  
+✅ **COMMERCIAL** : Peut gérer ses propres clients et contrats, créer des événements.  
+✅ **SUPPORT** : Peut modifier les événements qui lui sont attribués.  
 
 ---
 
-## 📌 **Bonnes Pratiques et Sécurité**
-- **Validation stricte des entrées utilisateur** pour éviter les injections SQL.
-- **Gestion des accès basée sur les rôles** pour éviter les fuites de données.
-- **Journaux d’erreurs avec Sentry** pour détecter et résoudre les anomalies.
-- **Architecture modulaire** pour faciliter la maintenance et l’évolutivité.
+## 🚀 **Exemples d'Utilisation**  
+
+### 🔹 **Connexion (Authentification)**
+```sh
+python main.py auth login --username admin --password admin123
+```  
+
+### 🔹 **Gestion des Utilisateurs**  
+Créer un utilisateur :  
+```sh
+python main.py user create --username manager --email manager@example.com --password admin123 --role GESTION
+```  
+
+Lister les utilisateurs :  
+```sh
+python main.py user report
+```  
+
+### 🔹 **Gestion des Clients**  
+Créer un client :  
+```sh
+python main.py client create --first-name Alice --last-name Dupont --email alice@example.com --phone 0601020304 --company-name "Startup Inc."
+```  
+
+### 🔹 **Gestion des Contrats**  
+Signer un contrat :  
+```sh
+python main.py contract sign --id 4
+```  
+
+### 🔹 **Gestion des Événements**  
+Créer un événement :  
+```sh
+python main.py event create --client-id 1 --contract-id 1 --name "Conférence annuelle" --start-date "2024-09-15_09:00:00" --end-date "2024-09-15_12:00:00" --location "Paris" --attendees 50 --notes "Événement VIP"
+```  
 
 ---
 
-## 📌 **Débogage et Solutions aux Problèmes Courants**
-### 🔹 **Erreur : `ModuleNotFoundError: No module named 'sqlalchemy'`**
-Solution :
+## 🔧 **Dépannage - Problèmes Courants et Solutions**  
+
+### ❌ `ModuleNotFoundError: No module named 'sqlalchemy'`  
+✅ **Solution :** Installer SQLAlchemy  
 ```sh
 pip install SQLAlchemy
-```
+```  
 
-### 🔹 **Erreur : `pytest` ne trouve pas les tests**
-Solution :
+### ❌ `pytest` ne trouve pas les tests  
+✅ **Solution :**  
 ```sh
 python -m pytest
-```
-
-### 🔹 **Erreur : `sqlite3.OperationalError: unable to open database file`**
-Solution :
-- Assure-toi que **la base de données a été initialisée** (`python main.py db init`).
-- Vérifie que l’application a les **droits d’accès** au fichier `database.db`.
+```  
 
 ---
 
-## 🎯 **Conclusion**
-Avec ce guide, tu peux maintenant **installer, configurer et exécuter** EpicEvent CRM efficacement. 🎯
+## 🎯 **Conclusion**  
+Avec ce guide, tu peux maintenant **installer, configurer et exécuter** EpicEvent CRM efficacement.  
 
-📌 **Commande finale pour tout tester :**
+📌 **Commande finale pour tout tester :**  
 ```sh
 pytest -v
-```
-
-Bonne utilisation du CRM ! 🚀
-
+```  
