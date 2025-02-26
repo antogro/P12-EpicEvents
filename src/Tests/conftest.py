@@ -1,7 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from unittest.mock import MagicMock
 from sqlalchemy.orm import sessionmaker
 import sys
 import os

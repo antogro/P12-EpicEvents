@@ -8,21 +8,22 @@ class UserSession:
 
     @classmethod
     def get_current_user(cls, ctx):
-        """Récupère l'utilisateur actuellement
+        """Récupère l'utilisateur actuellement 
         connecté en utilisant la session de `ctx.obj`
         """
         if cls._current_user is None:
             if not ctx.obj or "session" not in ctx.obj:
-                print("❌ Erreur : La session SQLAlchemy n'est "
-                      "pas disponible dans le contexte.")
+                print("❌ Erreur : La session SQLAlchemy"
+                      "n'est pas disponible dans le contexte.")
                 exit(1)
 
             session = ctx.obj["session"]
-
             token = Token.get_stored_token()
+            
             if token:
-                payload = Token.verify_token(token)
-                if payload:
+                result = Token.verify_token(token)
+                if result and result is not False:
+                    payload, _ = result
                     user_id = payload['sub'].split('_')[0]
                     cls._current_user = User.get_object(
                         session, id=int(user_id))

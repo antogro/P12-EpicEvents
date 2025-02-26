@@ -40,8 +40,7 @@ class PermissionManager:
 
     @classmethod
     def validate_permission(
-            cls, session, user, permission_name,
-            context=None, return_error=False
+        cls, session, user, permission_name, context=None, return_error=False
     ):
         """Vérifie si un utilisateur a une permission spécifique."""
         permission = DynamicPermission.get_object(
@@ -50,7 +49,8 @@ class PermissionManager:
             return (False, "Permission non trouvée") if return_error else False
 
         rules = DynamicPermissionRule.get_all_object(
-            session, permission_id=permission.id)
+            session, permission_id=permission.id
+        )
         context = context or {}
 
         errors = []
@@ -65,31 +65,28 @@ class PermissionManager:
 
             errors.append(rule.error_message)
 
-        return (False, errors[0]) if return_error and errors else (
-            False, "Permission refusée"
+        return (
+            (False, errors[0])
+            if return_error and errors
+            else (False, "Permission refusée")
         )
 
     @classmethod
     def _get_value(cls, attribute_path, user, context):
         """Récupère une valeur d'un objet en fonction du chemin"""
+
         if not attribute_path or attribute_path == "None":
             return None
-
         session = context.get("session")
-
         if attribute_path.startswith("user."):
             value = getattr(user, attribute_path.split(".")[1], None)
             return value if value is not None else ""
-
         if "." not in attribute_path:
             return attribute_path
-
         obj_type, attr = attribute_path.split(".")
         obj = context.get(obj_type)
-
         if isinstance(obj, int) and session:
             obj = cls._get_object_by_type(session, obj_type, obj)
-
         return getattr(obj, attr, attribute_path) if obj else attribute_path
 
     @classmethod
@@ -131,7 +128,6 @@ class PermissionManager:
         if not current_user:
             typer.secho("❌ Vous devez être connecté.", fg=typer.colors.RED)
             exit(1)
-
         has_permission, error_message = cls.validate_permission(
             session, current_user, permission_name, return_error=True
         )
@@ -155,7 +151,6 @@ def requires_permission(*permission_names):
     Vérifie qu'un utilisateur possède AU MOINS UNE des permissions.
     Affiche uniquement l'erreur qui lui est directement liée.
     """
-
     def decorator(func):
         @wraps(func)
         def wrapper(ctx: typer.Context, *args, **kwargs):
@@ -174,7 +169,7 @@ def requires_permission(*permission_names):
                 exit(1)
 
             contract_id = kwargs.get("contract_id")
-            client_id = kwargs.get("client_id")
+            client_id = kwargs.get("id")
 
             contract = (
                 Contract.get_object(session, id=contract_id)
@@ -185,8 +180,11 @@ def requires_permission(*permission_names):
                 session, id=client_id) if client_id else None
 
             context = {
-                "contract": contract, "client": client, "session": session
+                "contract": contract, "client": client,
+                "session": session, "contract_id": contract_id,
+                "client_id": client_id,
             }
+            print(f"🔍 Contexte final avant `validate_permission`: {context}")
 
             for perm in permission_names:
                 has_permission, error_message = (

@@ -120,7 +120,8 @@ class PermissionRule:
                 "operator": "==",
                 "value": "user.id",
                 "error_message":
-                    "Vous ne pouvez modifier que vos propres clients",
+                    "Seul l'équipe Commercial peut mettre"
+                    " à jour les clients dont ils sont responsables",
             },
             {
                 "permission_name": "update_own_contracts",

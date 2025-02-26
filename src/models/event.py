@@ -170,13 +170,13 @@ class Event(BaseModel):
             notes = event.notes or ''
 
         return {
-            'ID de l\'Evènement': event.id,
+            'ID de l\'Événement': event.id,
             "ID du support": event.support_contact_id,
             "ID du client": event.client_id,
             "ID du contrat": event.contract_id,
-            "Nom de l'évènement": event.name,
+            "Nom de l'événement": event.name,
             "Date de début": format_datetime(event.start_date),
-            "date de fin": format_datetime(event.end_date),
+            "Date de fin": format_datetime(event.end_date),
             "Localisation": event.location,
             "Nombre de participants": event.attendees,
             "Créé le": format_datetime(event.created_at),

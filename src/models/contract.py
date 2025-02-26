@@ -149,7 +149,7 @@ class Contract(BaseModel):
         return {
             "ID du client": contract.client_id,
             "ID du commercial": contract.commercial_id,
-            "Somme total à payer": contract.total_amount,
-            "Somme restante": contract.remaining_amount,
+            "Montant total": contract.total_amount,
+            "Montant restant": contract.remaining_amount,
             "Signé": contract.is_signed,
         }

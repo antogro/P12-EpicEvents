@@ -21,8 +21,6 @@ def get_session():
     """Récupère une session SQLAlchemy active"""
     try:
         session = Session()
-        print("⚠️ get_session() appelé")
-        print(f"get_session() called in {__name__}")  # ✅ Voir l'import réel
         return session
     except Exception as e:
         typer.secho("❌ Erreur : Impossible d'initialiser "
@@ -55,7 +53,7 @@ def create(
         typer.secho(f"✅ Utilisateur '{user.username}' créé avec succès !")
     except Exception as e:
         typer.secho(
-            f"❌ Erreur lors de la création de l'utilisateur : {str(e)}",
+            f"❌{str(e)}",
             fg=typer.colors.RED
         )
         raise typer.Exit(code=1)
@@ -86,7 +84,7 @@ def user_repport(
             else:
                 typer.secho("❌ Utilisateur non trouvé", fg=typer.colors.RED)
         else:
-            users = User.get_all_object(session, User)
+            users = User.get_all_object(session)
             if role:
                 users = [user for user in users if user.role == role.value]
 
@@ -116,6 +114,7 @@ def user_update(
 ):
     """Mettre à jour les informations d'un utilisateur"""
     session = get_session()
+    ctx.obj["client_id"] = id
     try:
         # Vérifie les permissions de l'utilisateur
 
@@ -139,7 +138,7 @@ def user_update(
 @requires_permission("manage_users")
 def delete(
     ctx: typer.Context,
-    user_id: int = typer.Option(..., help="ID de l'utilisateur à supprimer")
+    id: int = typer.Option(..., help="ID de l'utilisateur à supprimer")
 ):
     """Supprimer un utilisateur"""
     try:
@@ -149,9 +148,9 @@ def delete(
             "❓Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
             abort=True)
         session = get_session()
-        User.delete_object(session, user_id)
+        User.delete_object(session, id)
         typer.secho(
-            f'✅ Utilisateur {user_id} supprimé avec succès',
+            f'✅ Utilisateur {id} supprimé avec succès',
             fg=typer.colors.GREEN
         )
     except Exception as e:

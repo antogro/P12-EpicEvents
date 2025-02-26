@@ -59,23 +59,33 @@ class Token:
             exp_timestamp = payload.get("exp")
             iat_timestamp = payload.get("iat")
 
-            # Conversion des timestamps en format lisible
             exp_time = datetime.fromtimestamp(
                 exp_timestamp, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
             iat_time = datetime.fromtimestamp(
                 iat_timestamp, timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-            # Vérification si le token est expiré
             if exp_timestamp and datetime.fromtimestamp(
                     exp_timestamp, timezone.utc) < datetime.now(timezone.utc):
                 print("⚠️ Token expiré. Veuillez vous reconnecter.")
                 Token.clear_stored_token()
                 return False
 
-            print(f"✅ Token '{payload['sub']}' valide !")
-            print(f"📅 Émis le : {iat_time}")
-            print(f"⏳ Expire le : {exp_time}")
-            return payload
+            token_data = {
+                "Utilisateur": payload["sub"],
+                "Émis le": iat_time,
+                "Expire le": exp_time
+            }
+
+            return payload, token_data
+
+        except jwt.ExpiredSignatureError:
+            print("⚠️ Token expiré. Veuillez vous reconnecter.")
+            Token.clear_stored_token()
+            return False
+        except jwt.InvalidTokenError:
+            print("❌ Token invalide. Veuillez vous reconnecter.")
+            Token.clear_stored_token()
+            return False
 
         except jwt.ExpiredSignatureError:
             print("⚠️ Token expiré. Veuillez vous reconnecter.")
@@ -93,16 +103,20 @@ class Token:
 
     def ensure_authenticated():
         """Vérifie que l'utilisateur est authentifié
-        avant d'exécuter une commande
-        """
+        avant d'exécuter une commande"""
         token = Token.get_stored_token()
         if not token:
             print("❌ Accès refusé : vous devez être connecté.")
             exit(1)
-        playload = Token.verify_token(token)
-        if not playload:
+
+        result = Token.verify_token(token)
+
+        if not result or result is False:
             exit(1)
-        return playload['sub']
+
+        payload, _ = result
+
+        return payload['sub']
 
     def logout():
         Token.clear_stored_token()

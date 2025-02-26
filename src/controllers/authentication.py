@@ -52,10 +52,15 @@ def login(
 def verify_token():
     """Vérifie le token de l'utilisateur"""
     try:
-        token = Token.verify_token(Token.get_stored_token())
-        if token:
+        result = Token.verify_token(Token.get_stored_token())
+
+        if result and result is not False:
+            payload, token_data = result  # Décomposition correcte du tuple
             typer.secho(
-                f"✅ Token '{token['sub']}' valide !", fg=typer.colors.GREEN)
+                f"✅ Token '{payload['sub']}' valide !", fg=typer.colors.GREEN)
+            typer.secho(f"📆 Émis le : {token_data['Émis le']}")
+            typer.secho(f"⏳ Expire le : {token_data['Expire le']}")
+
     except Exception as e:
         typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
