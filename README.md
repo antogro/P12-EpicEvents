@@ -28,7 +28,7 @@ Si tu n’utilises pas Git, télécharge l’archive et extraits les fichiers.
 **Sous Windows :**  
 ```sh
 python -m venv .venv
-venv\Scripts\activate
+.venv\Scripts\activate
 ```  
 
 **Sous macOS/Linux :**  

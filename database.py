@@ -36,7 +36,7 @@ def create_permission_tables(engine):
 def init_database(database_url=DATABASE_URL):
     """Initialisation en deux étapes : core tables puis permissions"""
     engine = create_engine(database_url)
-    setup_relationships()  # Assurer que les relations sont bien définies
+    setup_relationships()
 
     create_core_tables(engine)
     create_permission_tables(engine)

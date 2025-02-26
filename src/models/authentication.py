@@ -10,7 +10,7 @@ TOKEN_STORAGE_PATH = Path.home() / ".epic_token"
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-TOKEN_EXPIRATION = 3600
+TOKEN_EXPIRATION = os.getenv("TOKEN_EXPIRATION")
 TOKEN_FILE = "src/config/token.txt"
 
 
