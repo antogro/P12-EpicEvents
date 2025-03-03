@@ -1,31 +1,17 @@
 import typer
-from sqlalchemy import create_engine
 from typing import Optional
-from sqlalchemy.orm import sessionmaker
 from models.user import User, UserRole
 from view.display_view import Display
 from sentry_sdk import capture_exception
 from models.permission import requires_permission, requires_login
+from models.common import get_session
 
 
-engine = create_engine('sqlite:///./epic_event.db')
-Session = sessionmaker(bind=engine)
 display = Display()
 
 user_app = typer.Typer(name='Epic Events User Management',
                        help='Application de Gestion '
                             'des Utilisateurs Epic Event')
-
-
-def get_session():
-    """Récupère une session SQLAlchemy active"""
-    try:
-        session = Session()
-        return session
-    except Exception as e:
-        typer.secho("❌ Erreur : Impossible d'initialiser "
-                    f"la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
 
 
 @user_app.command(name="create")

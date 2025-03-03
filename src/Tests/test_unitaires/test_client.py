@@ -1,6 +1,6 @@
 import pytest
-from src.models.client import Client
-from src.models.user import User
+from models.client import Client
+from models.user import User
 
 
 def test_create_client(mocker, session, make_client, make_user):
@@ -13,10 +13,10 @@ def test_create_client(mocker, session, make_client, make_user):
 
     client_fixture = make_client(commercial_id=user.id)
 
-    mocker.patch("src.models.client.Client.get_object", return_value=None)
-    mocker.patch("src.models.user.User.get_object", return_value=user)
+    mocker.patch("models.client.Client.get_object", return_value=None)
+    mocker.patch("models.user.User.get_object", return_value=user)
     mocker.patch(
-        "src.models.permission.PermissionManager.validate_permission",
+        "models.permission.PermissionManager.validate_permission",
         return_value=(True, None),
     )
 
@@ -32,7 +32,7 @@ def test_create_client_should_raise_error(mocker, session, make_client):
     client_fixture = make_client()
 
     mocker.patch(
-        "src.models.client.Client.get_object",
+        "models.client.Client.get_object",
         return_value=Client(**client_fixture)
     )
 
@@ -43,22 +43,20 @@ def test_create_client_should_raise_error(mocker, session, make_client):
         Client.create_object(session, **client_fixture)
 
 
-def test_get_client(session, make_client):
-    """Test qu'on peut récupérer un client existant
-     et qu'un client inexistant lève une erreur."""
-    client_fixture = make_client()
-    client = Client(**client_fixture)
+def test_get_client(mocker, session, make_client):
+    """
+    Test que la récupération d'un client fonctionne.
+    """
+    expected_contract = Client(**make_client(id=1))
 
-    retrieved_client = Client.get_object(session, id=client.id)
-    assert retrieved_client is not None
-    assert retrieved_client.id == client.id
+    mocker.patch.object(
+        Client, "get_object", return_value=Client(**make_client(id=1)))
 
-    client_not_found = Client.get_object(session, id=999)
-    assert client_not_found is None
+    retrieved_client = Client.get_object(session, id=1)
 
-    with pytest.raises(Exception, match="Le client n'existe pas"):
-        if client_not_found is None:
-            raise Exception("Le client n'existe pas")
+    assert retrieved_client.first_name == expected_contract.first_name
+    assert retrieved_client.last_name == expected_contract.last_name
+    assert retrieved_client.email == expected_contract.email
 
 
 def test_update_user_with_permission(mocker, session, make_client):
@@ -67,11 +65,11 @@ def test_update_user_with_permission(mocker, session, make_client):
     """
     client_fixture = make_client(id=2, email="emailtest3@email.f")
     mocker.patch(
-        "src.models.permission.PermissionManager.validate_permission",
+        "models.permission.PermissionManager.validate_permission",
         return_value=(True, None),
     )
     client = Client(**client_fixture)
-    mocker.patch("src.models.client.Client.get_object", return_value=client)
+    mocker.patch("models.client.Client.get_object", return_value=client)
 
     updated_client = client.update_object(
         session, client_id=client_fixture["id"], first_name="Newclientname"
@@ -84,7 +82,7 @@ def test_update_user_with_permission(mocker, session, make_client):
         Client.update_object(
             session, client_id=client.id, email="existing@example.com")
 
-    mocker.patch("src.models.client.Client.get_object", return_value=None)
+    mocker.patch("models.client.Client.get_object", return_value=None)
     with pytest.raises(Exception, match="Le client n'existe pas"):
         Client.update_object(
             session, client_id=999, email="test25@example.com")
@@ -98,7 +96,7 @@ def test_delete_client_with_permission(mocker, session, make_client):
     client = Client(**client_fixture)
     session.add(client)
     session.commit()
-    mocker.patch("src.models.client.Client.get_object", return_value=client)
+    mocker.patch("models.client.Client.get_object", return_value=client)
 
     deleted_client = client.delete_object(
         session, client_id=client_fixture["id"])

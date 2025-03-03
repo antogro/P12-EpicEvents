@@ -1,30 +1,16 @@
 import typer
-from sqlalchemy import create_engine
 from typing import Optional
-from sqlalchemy.orm import sessionmaker
 from models.client import Client
 from view.display_view import Display
-from src.models.permission import requires_permission, requires_login
+from models.permission import requires_permission, requires_login
+from models.common import get_session
 
-engine = create_engine("sqlite:///./epic_event.db")
-Session = sessionmaker(bind=engine)
 display = Display()
 
 client_app = typer.Typer(
     name="Epic Events client Management",
     help="Application de Gestion des clients Epic Event",
 )
-
-
-def get_session():
-    """Récupère une session SQLAlchemy active"""
-    try:
-        session = Session()
-        return session
-    except Exception as e:
-        typer.secho("❌ Erreur : Impossible d'initialiser "
-                    f"la session SQLAlchemy : {str(e)}", fg=typer.colors.RED)
-        raise typer.Exit(code=1)
 
 
 @client_app.command(name="create")
@@ -87,8 +73,8 @@ def client_list(
     session = get_session()
     headers = [
         "ID",
-        "First name",
-        "Last_name",
+        "Prènom",
+        "Nom",
         "Email",
         "Phone",
         "Company name",
@@ -108,7 +94,7 @@ def client_list(
                 typer.secho("❌ Client non trouvé", fg=typer.colors.RED)
         else:
             clients = Client.get_all_object(session)
-            if commercial_id:
+            if commercial_id is not None:
                 clients = [
                     client
                     for client in clients
@@ -161,7 +147,7 @@ def update_client(
             None, help="ID du commercial"),
 ):
     """Mise à jour d'un client"""
-    session = Session()
+    session = get_session()
     try:
         client = Client.update_object(
             session,

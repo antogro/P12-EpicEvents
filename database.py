@@ -9,10 +9,14 @@ from src.models.permission import DynamicPermission, DynamicPermissionRule
 from src.models.relationships import setup_relationships
 from src.config.permission_rules import PermissionRule
 import os
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "epic_event.db")
-DATABASE_URL = f"sqlite:///{DB_PATH}"
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///epic_event.db")
+engine = create_engine(DATABASE_URL)
 
 
 def create_core_tables(engine):

@@ -1,23 +1,23 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from src.models.user import User
+from models.user import User
+from pathlib import Path
 import os
 from dotenv import load_dotenv
-from pathlib import Path
-
-TOKEN_STORAGE_PATH = Path.home() / ".epic_token"
 
 load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
 
-TOKEN_EXPIRATION = os.getenv("TOKEN_EXPIRATION")
-TOKEN_FILE = "src/config/token.txt"
+
+TOKEN_STORAGE_PATH = Path.home() / ".epic_token"
+SECRET_KEY = os.getenv("SECRET_KEY", "my_secret_key_is_beautifull")
+TOKEN_EXPIRATION = os.getenv("TOKEN_EXPIRATION", 3600)
 
 
 class Token:
     def create_token(user):
         payload = {
-            'exp': datetime.utcnow() + timedelta(seconds=TOKEN_EXPIRATION),
+            'exp': datetime.utcnow() + timedelta(
+                seconds=int(TOKEN_EXPIRATION)),
             'iat': datetime.utcnow(),
             'sub': f"{user.id}_{user.username}"
         }

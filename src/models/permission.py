@@ -184,7 +184,6 @@ def requires_permission(*permission_names):
                 "session": session, "contract_id": contract_id,
                 "client_id": client_id,
             }
-            print(f"🔍 Contexte final avant `validate_permission`: {context}")
 
             for perm in permission_names:
                 has_permission, error_message = (
@@ -196,9 +195,7 @@ def requires_permission(*permission_names):
                         return_error=True
                     )
                 )
-                print(
-                    f"🔎 Vérification {perm}: "
-                    f"{'✅' if has_permission else '❌'}")
+
                 if has_permission:
                     return func(ctx, *args, **kwargs)
 

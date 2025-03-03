@@ -1,5 +1,5 @@
-from src.models.authentication import Token
-from src.models.user import User
+from models.authentication import Token
+from models.user import User
 
 
 class UserSession:
@@ -19,7 +19,7 @@ class UserSession:
 
             session = ctx.obj["session"]
             token = Token.get_stored_token()
-            
+
             if token:
                 result = Token.verify_token(token)
                 if result and result is not False:

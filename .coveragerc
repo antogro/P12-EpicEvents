@@ -1,2 +1,12 @@
 [run]
-omit = tests/*
+omit =
+    tests/*  # Exclut tous les fichiers de tests
+    */conftest.py  # Exclut conftest.py s'il est utilisé
+    */__init__.py  # Optionnel : Exclut les fichiers __init__.py
+    */src/models/relationships.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__.:

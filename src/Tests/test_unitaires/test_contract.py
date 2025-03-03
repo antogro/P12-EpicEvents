@@ -1,6 +1,6 @@
 import pytest
-from src.models.contract import Contract
-from src.models.user import User
+from models.contract import Contract
+from models.user import User
 
 
 def test_create_contract(mocker, session, make_contract, make_user):

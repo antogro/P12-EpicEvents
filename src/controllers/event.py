@@ -1,34 +1,18 @@
 import typer
-from sqlalchemy import create_engine
 from typing import Optional
-from sqlalchemy.orm import sessionmaker
 from models.event import Event
 from view.display_view import Display
 from models.permission import requires_permission, requires_login
 from models.contract import Contract
 from models.user_session import UserSession
+from models.common import get_session
 
-engine = create_engine("sqlite:///./epic_event.db")
-Session = sessionmaker(bind=engine)
 display = Display()
 
 event_app = typer.Typer(
     name="Epic Events Management",
     help="Application de Gestion des Événements Epic Events"
 )
-
-
-def get_session():
-    """Récupère une session SQLAlchemy active."""
-    try:
-        return Session()
-    except Exception as e:
-        typer.secho(
-            f"❌ Erreur : Impossible d'initialiser "
-            f"la session SQLAlchemy : {str(e)}",
-            fg=typer.colors.RED
-        )
-        raise typer.Exit(code=1)
 
 
 @event_app.command(name="create")
@@ -206,7 +190,7 @@ def assign_support(
 @requires_permission("update_own_events")
 def event_delete(
     ctx: typer.Context,
-    event_id: int = typer.Option(
+    id: int = typer.Option(
         ..., prompt=True, help="ID de l'événement à supprimer"),
 ):
     """Supprime un événement."""
@@ -215,11 +199,11 @@ def event_delete(
     if ctx.obj is None:
         ctx.obj = {}
 
-    ctx.obj["event_id"] = event_id
+    ctx.obj["event_id"] = id
 
     try:
-        Event.delete_object(session, event_id=event_id)
-        typer.secho(f"✅ L'événement n°{event_id} a été supprimé")
+        Event.delete_object(session, event_id=id)
+        typer.secho(f"✅ L'événement n°{id} a été supprimé")
     except Exception as e:
         typer.secho(f"❌ Une erreur est survenue : {e}", fg=typer.colors.RED)
 

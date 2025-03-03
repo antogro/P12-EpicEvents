@@ -1,32 +1,16 @@
 import typer
-from sqlalchemy import create_engine
 from typing import Optional
-from sqlalchemy.orm import sessionmaker
-from src.models.contract import Contract
-from src.models.permission import requires_permission, requires_login
+from models.contract import Contract
+from models.permission import requires_permission, requires_login
 from view.display_view import Display
+from models.common import get_session
 
-engine = create_engine("sqlite:///./epic_event.db")
-Session = sessionmaker(bind=engine)
 display = Display()
 
 contract_app = typer.Typer(
     name="Epic Events Contract Management",
     help="Application de Gestion des Contrats Epic Event"
 )
-
-
-def get_session():
-    """Récupère une session SQLAlchemy active."""
-    try:
-        return Session()
-    except Exception as e:
-        typer.secho(
-            f"❌ Erreur : Impossible d'initialiser"
-            f" la session SQLAlchemy : {str(e)}",
-            fg=typer.colors.RED
-        )
-        raise typer.Exit(code=1)
 
 
 @contract_app.command(name="create")
@@ -108,7 +92,7 @@ def contract_list(
 @requires_permission("manage_all_contracts", "update_own_contracts")
 def sign_contract(
     ctx: typer.Context,
-    contract_id: int = typer.Option(
+    id: int = typer.Option(
         ..., prompt=True, help="ID du contrat à signer"),
 ):
     """Signe un contrat."""
@@ -118,11 +102,11 @@ def sign_contract(
     if ctx.obj is None:
         ctx.obj = {}
 
-    ctx.obj["contract_id"] = contract_id
+    ctx.obj["contract_id"] = id
 
     try:
-        Contract.sign_object(session, contract_id=contract_id)
-        typer.secho(f"✅ Contrat n°{contract_id} signé avec succès !")
+        Contract.sign_object(session, contract_id=id)
+        typer.secho(f"✅ Contrat n°{id} signé avec succès !")
     except Exception as e:
         typer.secho(f"\n ❌ {str(e)}", fg=typer.colors.RED)
 
@@ -172,7 +156,7 @@ def payment(
 @requires_permission("update_own_contracts", "manage_all_contracts")
 def delete(
     ctx: typer.Context,
-    contract_id: int = typer.Option(
+    id: int = typer.Option(
         None, prompt=True, help="ID du contrat à supprimer"),
 ):
     """Supprime un contrat."""
@@ -182,12 +166,12 @@ def delete(
     if ctx.obj is None:
         ctx.obj = {}
 
-    ctx.obj["contract_id"] = contract_id
+    ctx.obj["contract_id"] = id
 
     try:
-        Contract.delete_object(session, contract_id)
+        Contract.delete_object(session, id)
         typer.secho(
-            f'✅ Contrat {contract_id} supprimé avec succès',
+            f'✅ Contrat {id} supprimé avec succès',
             fg=typer.colors.GREEN)
     except Exception as e:
         typer.secho(f"❌ Erreur: {str(e)}", fg=typer.colors.RED)

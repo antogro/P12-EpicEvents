@@ -1,8 +1,8 @@
 import pytest
-from src.models.event import Event
-from src.models.user import User
-from src.models.contract import Contract
-from src.models.client import Client
+from models.event import Event
+from models.user import User
+from models.contract import Contract
+from models.client import Client
 from datetime import datetime
 
 
@@ -165,7 +165,7 @@ def test_update_event_should_raise_error_no_event(mocker, session):
     event_id = 1
     update_data = {"location": "Updated Location", "attendees": 20}
 
-    mocker.patch("src.models.event.Event.get_object", return_value=None)
+    mocker.patch("models.event.Event.get_object", return_value=None)
 
     with pytest.raises(Exception, match="L'événement n'existe pas"):
         Event.update_object(session, event_id, **update_data)

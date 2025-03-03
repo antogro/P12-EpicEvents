@@ -133,13 +133,14 @@ class Client(BaseModel):
         Format les données du client pour la mise en page
         """
         commercial = User.get_object(session, id=client.commercial_id)
+        commercial_name = commercial.username if commercial else "Non attribué"            
         return {
                 "ID": client.id,
-                "First name": client.first_name,
-                "Last_name": client.last_name,
+                "Prènom": client.first_name,
+                "Nom": client.last_name,
                 "Email": client.email,
                 "Phone": client.phone,
                 "Company name": client.company_name,
                 "Commercial ID": client.commercial_id,
-                "Commercial Name": commercial.username
+                "Commercial Name": commercial_name
         }
