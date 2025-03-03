@@ -53,6 +53,7 @@ TOKEN_EXPIRATION=3600
 ### ✅ **5. Initialiser la Base de Données**  
 ```sh
 python database.py
+python create_admin.py
 ```  
 
 ### ✅ **6. Lancer l’Application**  
