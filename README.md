@@ -56,12 +56,7 @@ python database.py
 python create_admin.py
 ```  
 
-### ✅ **6. Lancer l’Application**  
-```sh
-python main.py
-```  
-
-### ✅ **7. Exécuter les Tests Unitaires**  
+### ✅ **6. Exécuter les Tests Unitaires**  
 ```sh
 pytest -v
 ```  
@@ -88,7 +83,7 @@ EpicEvent applique un **contrôle d'accès strict** basé sur trois rôles :
 
 ### 🔹 **Connexion (Authentification)**
 ```sh
-python main.py auth login --username admin --password AdminSecure123
+python main.py auth login --username admin --password AdminSecure123!
 ```  
 
 ### 🔹 **Gestion des Utilisateurs**  
@@ -140,8 +135,3 @@ python -m pytest
 
 ## 🎯 **Conclusion**  
 Avec ce guide, tu peux maintenant **installer, configurer et exécuter** EpicEvent CRM efficacement.  
-
-📌 **Commande finale pour tout tester :**  
-```sh
-pytest -v
-```  
