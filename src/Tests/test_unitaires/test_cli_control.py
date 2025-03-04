@@ -1,13 +1,13 @@
 from typer.testing import CliRunner
-from controllers.authentication import auth_app
-from controllers.user import user_app
-from controllers.client import client_app
-from controllers.contract import contract_app
-from controllers.event import event_app
-from models.user import User
-from models.client import Client
-from models.contract import Contract
-from models.event import Event
+from src.controllers.authentication import auth_app
+from src.controllers.user import user_app
+from src.controllers.client import client_app
+from src.controllers.contract import contract_app
+from src.controllers.event import event_app
+from src.models.user import User
+from src.models.client import Client
+from src.models.contract import Contract
+from src.models.event import Event
 
 
 runner = CliRunner()
@@ -16,7 +16,7 @@ runner = CliRunner()
 def test_login(mocker):
     """Test de la connexion d'un utilisateur"""
     mocker.patch(
-        "models.authentication.Token.login",
+        "src.models.authentication.Token.login",
         return_value={"success": True, "token": "fake-token"},
     )
 
@@ -35,11 +35,11 @@ def test_verify_token(mocker):
     """
     # Our code references "models.authentication.Token" so we patch that
     mocker.patch(
-        "models.authentication.Token.get_stored_token",
+        "src.models.authentication.Token.get_stored_token",
         return_value="fake-token"
     )
     mocker.patch(
-        "models.authentication.Token.verify_token",
+        "src.models.authentication.Token.verify_token",
         return_value=(
             {"sub": "3_commercial"},  # payload
             {
@@ -58,7 +58,7 @@ def test_verify_token(mocker):
 def test_logout(mocker):
     """Test de la déconnexion"""
     mocker.patch(
-        "models.authentication.Token.logout",
+        "src.models.authentication.Token.logout",
         return_value={"success": True, "message": "Déconnexion réussie"},
     )
 
@@ -69,14 +69,14 @@ def test_logout(mocker):
 
 def test_create_user(mocker, session, ctx_with_session, make_user):
     # Mock `get_session` so it uses our fixture's session
-    mocker.patch("controllers.user.get_session", return_value=session)
+    mocker.patch("src.controllers.user.get_session", return_value=session)
 
     mock_user = User(**make_user())
 
-    mocker.patch("models.user.User.create_object", return_value=mock_user)
+    mocker.patch("src.models.user.User.create_object", return_value=mock_user)
 
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="GESTION", id=1)),
     )
 
@@ -95,10 +95,10 @@ def test_create_user(mocker, session, ctx_with_session, make_user):
 def test_delete_user(mocker, session, ctx_with_session, make_user):
     """Test de la suppression d'un utilisateur"""
     # Make sure the real DB delete is never called
-    mocker.patch("models.user.User.delete_object", return_value=True)
+    mocker.patch("src.models.user.User.delete_object", return_value=True)
 
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="GESTION", id=1)),
     )
 
@@ -117,11 +117,11 @@ def test_delete_user(mocker, session, ctx_with_session, make_user):
 def test_create_client(mocker, session, make_user, make_client):
     """Test de la création d'un client"""
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="COMMERCIAL", id=1)),
     )
     mocker.patch(
-        "models.client.Client.create_object",
+        "src.models.client.Client.create_object",
         return_value=Client(**make_client(commercial_id=1)),
     )
 
@@ -141,13 +141,13 @@ def test_delete_client(
         mocker, session, ctx_with_session, make_client, make_user):
     """Test de la suppression d'un client"""
     mocker.patch(
-        "models.client.Client.get_object",
+        "src.models.client.Client.get_object",
         return_value=Client(**make_client(commercial_id=1))
     )
-    mocker.patch("models.client.Client.delete_object", return_value=True)
+    mocker.patch("src.models.client.Client.delete_object", return_value=True)
 
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="COMMERCIAL", id=1)))
 
     result = runner.invoke(
@@ -162,17 +162,17 @@ def test_delete_client(
 def test_create_contract(mocker, session, make_user):
     """Test de la création d'un contrat"""
 
-    mocker.patch("controllers.contract.get_session", return_value=session)
+    mocker.patch("src.controllers.contract.get_session", return_value=session)
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="GESTION", id=2)),
     )
     mocker.patch(
-        "models.user.User.get_object",
+        "src.models.user.User.get_object",
         return_value=User(**make_user(role="COMMERCIAL", id=1)),
     )
     mocker.patch(
-        "models.contract.Contract.create_object",
+        "src.models.contract.Contract.create_object",
         return_value=Contract(
             id=1,
             client_id=1,
@@ -201,17 +201,17 @@ def test_sign_contract(mocker, session, make_user):
     so role=GESTION or role=COMMERCIAL with matching contract data.
     Also the CLI might call typer.confirm => we pass "y".
     """
-    mocker.patch("controllers.contract.get_session", return_value=session)
+    mocker.patch("src.controllers.contract.get_session", return_value=session)
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="GESTION", id=2)),
     )
     mocker.patch(
-        "models.user.User.get_object",
+        "src.models.user.User.get_object",
         return_value=User(**make_user(role="COMMERCIAL", id=1)),
     )
 
-    mocker.patch("models.contract.Contract.sign_object", return_value=True)
+    mocker.patch("src.models.contract.Contract.sign_object", return_value=True)
 
     result = runner.invoke(
         contract_app, ["sign", "--id", "1"],
@@ -225,18 +225,18 @@ def test_sign_contract(mocker, session, make_user):
 def test_delete_contract(mocker, session, make_user):
     """Test de la suppression d'un contrat avec confirmation 'y'."""
 
-    mocker.patch("models.user_session.UserSession.get_current_user",
+    mocker.patch("src.models.user_session.UserSession.get_current_user",
                  return_value=User(**make_user(role="GESTION", id=2)))
 
     mock_contract = Contract(
         id=1, client_id=1, commercial_id=2,
         total_amount=1500.0, remaining_amount=500.0, is_signed=True)
 
-    mocker.patch("models.contract.Contract.get_object",
+    mocker.patch("src.models.contract.Contract.get_object",
                  return_value=mock_contract)
 
     mocker.patch(
-        "models.contract.Contract.delete_object", return_value=True)
+        "src.models.contract.Contract.delete_object", return_value=True)
 
     result = runner.invoke(contract_app, ["delete", "--id", "1"],
                            obj={"session": session}, input="y")
@@ -252,24 +252,23 @@ def test_create_event(mocker, session, make_user, make_event):
     pass "obj={"session": session}" and the input fields.
     """
     mocker.patch(
-        "models.user_session.UserSession.get_current_user",
+        "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="COMMERCIAL", id=2)),
     )
 
     mocker.patch(
-        "models.client.Client.get_object",
+        "src.models.client.Client.get_object",
         return_value=Client(id=1, commercial_id=2)
     )
     mocker.patch(
-        "models.contract.Contract.get_object",
+        "src.models.contract.Contract.get_object",
         return_value=Contract(
             id=1, client_id=1, commercial_id=2, is_signed=True),
     )
     mocker.patch(
-        "models.event.Event.create_object", return_value=Event(**make_event()))
+        "src.models.event.Event.create_object",
+        return_value=Event(**make_event()))
 
-    # Provide name, support_contact_id, client_id, contract_id,
-    # start_date, end_date, location, attendees, notes
     result = runner.invoke(
         event_app,
         [

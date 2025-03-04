@@ -1,11 +1,11 @@
 import typer
 from typing import Optional
-from models.event import Event
-from view.display_view import Display
-from models.permission import requires_permission, requires_login
-from models.contract import Contract
-from models.user_session import UserSession
-from models.common import get_session
+from src.models.event import Event
+from src.view.display_view import Display
+from src.models.permission import requires_permission, requires_login
+from src.models.contract import Contract
+from src.models.user_session import UserSession
+from src.models.common import get_session
 
 display = Display()
 

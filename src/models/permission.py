@@ -113,29 +113,29 @@ class PermissionManager:
             actual_value, expected_value
         )
 
-    @classmethod
-    def check_user_permission(cls, ctx: typer.Context, permission_name: str):
-        """Vérifie si l'utilisateur actuel a la permission spécifiée"""
-        session = ctx.obj.get("session") if ctx.obj else None
-        if not session:
-            typer.secho(
-                "❌ Erreur : Session SQLAlchemy non disponible.",
-                fg=typer.colors.RED
-            )
-            exit(1)
+    # @classmethod
+    # def check_user_permission(cls, ctx: typer.Context, permission_name: str):
+    #     """Vérifie si l'utilisateur actuel a la permission spécifiée"""
+    #     session = ctx.obj.get("session") if ctx.obj else None
+    #     if not session:
+    #         typer.secho(
+    #             "❌ Erreur : Session SQLAlchemy non disponible.",
+    #             fg=typer.colors.RED
+    #         )
+    #         exit(1)
 
-        current_user = UserSession.get_current_user(ctx)
-        if not current_user:
-            typer.secho("❌ Vous devez être connecté.", fg=typer.colors.RED)
-            exit(1)
-        has_permission, error_message = cls.validate_permission(
-            session, current_user, permission_name, return_error=True
-        )
-        if not has_permission:
-            typer.secho(f"❌ {error_message}", fg=typer.colors.RED)
-            exit(1)
+    #     current_user = UserSession.get_current_user(ctx)
+    #     if not current_user:
+    #         typer.secho("❌ Vous devez être connecté.", fg=typer.colors.RED)
+    #         exit(1)
+    #     has_permission, error_message = cls.validate_permission(
+    #         session, current_user, permission_name, return_error=True
+    #     )
+    #     if not has_permission:
+    #         typer.secho(f"❌ {error_message}", fg=typer.colors.RED)
+    #         exit(1)
 
-        return True
+    #     return True
 
 
 def requires_login():

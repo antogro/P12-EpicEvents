@@ -1,9 +1,9 @@
 import typer
 from typing import Optional
-from models.client import Client
-from view.display_view import Display
-from models.permission import requires_permission, requires_login
-from models.common import get_session
+from src.models.client import Client
+from src.view.display_view import Display
+from src.models.permission import requires_permission, requires_login
+from src.models.common import get_session
 
 display = Display()
 

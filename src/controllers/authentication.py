@@ -1,7 +1,7 @@
 import typer
-from models.authentication import Token
-from view.display_view import Display
-from models.common import get_session
+from src.models.authentication import Token
+from src.view.display_view import Display
+from src.models.common import get_session
 
 display = Display()
 

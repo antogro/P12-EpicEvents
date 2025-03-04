@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime
-from models.base import BaseModel
-from models.validators import UserValidator
+from src.models.base import BaseModel
+from src.models.validators import UserValidator
 import hashlib
 import os
-from config.sentry_base import logger
+from src.config.sentry_base import logger
 from enum import Enum
 
 

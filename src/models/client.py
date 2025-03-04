@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from models.base import BaseModel
-from models.validators import ClientValidator
-from models.user import User
+from src.models.base import BaseModel
+from src.models.validators import ClientValidator
+from src.models.user import User
 
 
 class Client(BaseModel):
@@ -133,7 +133,7 @@ class Client(BaseModel):
         Format les données du client pour la mise en page
         """
         commercial = User.get_object(session, id=client.commercial_id)
-        commercial_name = commercial.username if commercial else "Non attribué"            
+        commercial_name = commercial.username if commercial else "Non attribué"
         return {
                 "ID": client.id,
                 "Prènom": client.first_name,

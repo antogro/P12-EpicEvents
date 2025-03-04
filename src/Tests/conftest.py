@@ -2,14 +2,8 @@ import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import sys
-import os
-
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-)
-from config.permission_rules import PermissionRule
-from models.base import Base
+from src.config.permission_rules import PermissionRule
+from src.models.base import Base
 
 
 @pytest.fixture(scope="module")

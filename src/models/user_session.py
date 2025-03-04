@@ -1,5 +1,5 @@
-from models.authentication import Token
-from models.user import User
+from src.models.authentication import Token
+from src.models.user import User
 
 
 class UserSession:
@@ -8,7 +8,7 @@ class UserSession:
 
     @classmethod
     def get_current_user(cls, ctx):
-        """Récupère l'utilisateur actuellement 
+        """Récupère l'utilisateur actuellement
         connecté en utilisant la session de `ctx.obj`
         """
         if cls._current_user is None:

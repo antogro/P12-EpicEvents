@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float, Boolean
-from models.base import BaseModel
-from models.validators import ContractValidator
-from models.user import User
-from config.sentry_base import logger
+from src.models.base import BaseModel
+from src.models.validators import ContractValidator
+from src.models.user import User
+from src.config.sentry_base import logger
 
 
 class Contract(BaseModel):

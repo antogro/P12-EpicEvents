@@ -1,6 +1,6 @@
 import pytest
-from models.contract import Contract
-from models.user import User
+from src.models.contract import Contract
+from src.models.user import User
 
 
 def test_create_contract(mocker, session, make_contract, make_user):
@@ -11,15 +11,15 @@ def test_create_contract(mocker, session, make_contract, make_user):
     user = User(**user_fixture)
 
     mocker.patch(
-        "models.validators.ContractValidator.validate_required_fields",
+        "src.models.validators.ContractValidator.validate_required_fields",
         return_value=None,
     )
     mocker.patch(
-        "models.validators.ContractValidator.validate_amounts",
+        "src.models.validators.ContractValidator.validate_amounts",
         return_value=None
     )
-    mocker.patch("models.contract.Contract.get_object", return_value=None)
-    mocker.patch("models.user.User.get_object", return_value=user)
+    mocker.patch("src.models.contract.Contract.get_object", return_value=None)
+    mocker.patch("src.models.user.User.get_object", return_value=user)
 
     contract = Contract.create_object(session, **contract_fixture)
 
@@ -55,8 +55,8 @@ def test_create_contract_should_raise_error_with_invalid_amount(
     contract_fixture = make_contract(remaining_amount=1300)
     user = User(**user_fixture)
 
-    mocker.patch("models.contract.Contract.get_object", return_value=None)
-    mocker.patch("models.user.User.get_object", return_value=user)
+    mocker.patch("src.models.contract.Contract.get_object", return_value=None)
+    mocker.patch("src.models.user.User.get_object", return_value=user)
 
     with pytest.raises(
         Exception,

@@ -1,8 +1,8 @@
 import pytest
-from models.event import Event
-from models.user import User
-from models.contract import Contract
-from models.client import Client
+from src.models.event import Event
+from src.models.user import User
+from src.models.contract import Contract
+from src.models.client import Client
 from datetime import datetime
 
 
@@ -16,11 +16,12 @@ def test_create_event(
     contract_fixture = Contract(**make_contract())
 
     mocker.patch(
-        "models.contract.Contract.get_object", return_value=contract_fixture)
+        "src.models.contract.Contract.get_object",
+        return_value=contract_fixture)
     mocker.patch(
-        "models.user.User.get_object", return_value=User(**support_user))
+        "src.models.user.User.get_object", return_value=User(**support_user))
     mocker.patch(
-        "models.client.Client.get_object",
+        "src.models.client.Client.get_object",
         return_value=Client(**client_fixture)
     )
 
@@ -47,11 +48,12 @@ def test_create_event_should_raise_error_missing_required_fields(
     }
 
     mocker.patch(
-        "models.validators.EventValidator.validate_dates", return_value=None)
+        "src.models.validators.EventValidator.validate_dates",
+        return_value=None)
     mocker.patch(
-        "models.user.User.get_object", return_value=User(**support_user))
+        "src.models.user.User.get_object", return_value=User(**support_user))
     mocker.patch(
-        "models.client.Client.get_object",
+        "src.models.client.Client.get_object",
         return_value=Client(**client_fixture)
     )
 
@@ -103,18 +105,18 @@ def test_create_event_should_raise_error_no_support_role(
     contract_fixture = Contract(**make_contract())
 
     mocker.patch(
-        "models.contract.Contract.get_object",
+        "src.models.contract.Contract.get_object",
         return_value=contract_fixture
     )
     mocker.patch(
-        "models.validators.EventValidator.validate_required_fields",
+        "src.models.validators.EventValidator.validate_required_fields",
         return_value=None
     )
     mocker.patch(
-        "models.validators.EventValidator.validate_dates",
+        "src.models.validators.EventValidator.validate_dates",
         return_value=None)
     mocker.patch(
-        "models.user.User.get_object",
+        "src.models.user.User.get_object",
         return_value=User(**commercial_user))
 
     with pytest.raises(Exception, match="Le SUPPORT n'existe pas"):
@@ -130,12 +132,12 @@ def test_create_event_should_raise_error_no_client(
     contract_fixture = Contract(**make_contract())
 
     mocker.patch(
-        "models.contract.Contract.get_object",
+        "src.models.contract.Contract.get_object",
         return_value=contract_fixture)
     mocker.patch(
-        "models.user.User.get_object",
+        "src.models.user.User.get_object",
         return_value=User(**support_user))
-    mocker.patch("models.client.Client.get_object", return_value=None)
+    mocker.patch("src.models.client.Client.get_object", return_value=None)
 
     with pytest.raises(Exception, match="Le client n'existe pas"):
         Event.create_object(session, **event_fixture)
@@ -165,7 +167,7 @@ def test_update_event_should_raise_error_no_event(mocker, session):
     event_id = 1
     update_data = {"location": "Updated Location", "attendees": 20}
 
-    mocker.patch("models.event.Event.get_object", return_value=None)
+    mocker.patch("src.models.event.Event.get_object", return_value=None)
 
     with pytest.raises(Exception, match="L'événement n'existe pas"):
         Event.update_object(session, event_id, **update_data)

@@ -2,11 +2,11 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta, timezone
-from models.base import Base
-from models.user import User, UserRole
-from models.client import Client
-from models.contract import Contract
-from models.event import Event
+from src.models.base import Base
+from src.models.user import User, UserRole
+from src.models.client import Client
+from src.models.contract import Contract
+from src.models.event import Event
 
 
 @pytest.fixture(scope="function")

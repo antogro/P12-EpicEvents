@@ -1,6 +1,6 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from models.user import User
+from src.models.user import User
 from pathlib import Path
 import os
 from dotenv import load_dotenv

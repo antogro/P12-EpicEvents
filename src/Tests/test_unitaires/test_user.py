@@ -1,13 +1,13 @@
-from models.user import User
+from src.models.user import User
 
 
 def test_create_user_with_permission(mocker, session, make_user):
     """Test qu'un utilisateur avec la permission
     peut créer un nouvel utilisateur."""
     new_user_fixture = make_user(role="COMMERCIAL")
-    mocker.patch("models.user.User.get_object", return_value=None)
+    mocker.patch("src.models.user.User.get_object", return_value=None)
     mocker.patch(
-        "models.permission.PermissionManager.validate_permission",
+        "src.models.permission.PermissionManager.validate_permission",
         return_value=(True, None),
     )
 
@@ -23,7 +23,7 @@ def test_get_user(mocker, session, make_user):
     user_fixture = make_user(role="COMMERCIAL")
     user = User(**user_fixture)
 
-    mocker.patch("models.user.User.get_object", return_value=user)
+    mocker.patch("src.models.user.User.get_object", return_value=user)
 
     retrieved_user = User.get_object(session, id=user_fixture["id"])
 
@@ -39,11 +39,11 @@ def test_update_user_with_permission(mocker, session, make_user):
                              email="email@testemail.f",
                              id=2)
     mocker.patch(
-        "models.permission.PermissionManager.validate_permission",
+        "src.models.permission.PermissionManager.validate_permission",
         return_value=(True, None),
     )
     user = User(**user_fixture)
-    mocker.patch("models.user.User.get_object", return_value=user)
+    mocker.patch("src.models.user.User.get_object", return_value=user)
 
     updated_user = User.update_object(
         session, user_id=user_fixture["id"], username="NewUsername"
@@ -63,7 +63,7 @@ def test_delete_user_with_permission(mocker, session, make_user):
     user = User(**user_fixture)
     session.add(user)
     session.commit()
-    mocker.patch("models.user.User.get_object", return_value=user)
+    mocker.patch("src.models.user.User.get_object", return_value=user)
 
     deleted_user = User.delete_object(session, user_id=user_fixture["id"])
 

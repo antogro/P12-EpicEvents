@@ -1,9 +1,9 @@
 import typer
 from typing import Optional
-from models.contract import Contract
-from models.permission import requires_permission, requires_login
-from view.display_view import Display
-from models.common import get_session
+from src.models.contract import Contract
+from src.models.permission import requires_permission, requires_login
+from src.view.display_view import Display
+from src.models.common import get_session
 
 display = Display()
 

@@ -1,10 +1,10 @@
 import typer
 from typing import Optional
-from models.user import User, UserRole
-from view.display_view import Display
+from src.models.user import User, UserRole
+from src.view.display_view import Display
 from sentry_sdk import capture_exception
-from models.permission import requires_permission, requires_login
-from models.common import get_session
+from src.models.permission import requires_permission, requires_login
+from src.models.common import get_session
 
 
 display = Display()
