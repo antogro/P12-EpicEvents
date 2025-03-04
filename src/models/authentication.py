@@ -38,7 +38,7 @@ class Token:
             }
         return {
             'success': False,
-            'message': 'Invalid username or password.'
+            'message': 'Identifiants ou mot de passe invalide'
         }
 
     def save_token(token: str):
@@ -77,15 +77,6 @@ class Token:
             }
 
             return payload, token_data
-
-        except jwt.ExpiredSignatureError:
-            print("⚠️ Token expiré. Veuillez vous reconnecter.")
-            Token.clear_stored_token()
-            return False
-        except jwt.InvalidTokenError:
-            print("❌ Token invalide. Veuillez vous reconnecter.")
-            Token.clear_stored_token()
-            return False
 
         except jwt.ExpiredSignatureError:
             print("⚠️ Token expiré. Veuillez vous reconnecter.")

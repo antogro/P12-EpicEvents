@@ -26,7 +26,9 @@ def login(
             typer.secho(
                 f"✅ {username} connecté avec succès", fg=typer.colors.GREEN)
         else:
-            typer.secho("❌ Identifiants invalides", fg=typer.colors.RED)
+            typer.secho(
+                f"❌ {token['message']}",
+                fg=typer.colors.RED)
             raise typer.Exit(code=1)
     except Exception as e:
         typer.secho(f"{str(e)}", fg=typer.colors.RED)
