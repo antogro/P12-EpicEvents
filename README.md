@@ -112,7 +112,7 @@ python main.py contract sign --id 4
 ### 🔹 **Gestion des Événements**  
 Créer un événement :  
 ```sh
-python main.py event create, "--client-id", "1", "--contract-id", "1", "--name", "Conférence annuelle", "--start-date", "2024-09-15_09:00:00", "--end-date", "2024-09-15_12:00:00", "--location", "Paris", "--attendees 50", "--notes", "Événement VIP"
+python main.py event create --client-id 1 --contract-id 1 --name Conférence annuelle --start-date 2024-09-15_09:00:00 --end-date 2024-09-15_12:00:00 --location Paris --attendees 50 --notes Événement VIP
 ```  
 
 ---
