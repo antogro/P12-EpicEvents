@@ -158,7 +158,6 @@ def payment(
 
 
 @contract_app.command(name="delete")
-@requires_permission("update_own_contracts", "manage_all_contracts")
 def delete(
     ctx: typer.Context,
     id: int = typer.Option(

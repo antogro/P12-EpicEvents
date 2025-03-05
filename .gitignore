@@ -179,3 +179,4 @@ verify_permissions.py
 
 src/config/token.txt
 epic_event.db
+.vscode/settings.json
