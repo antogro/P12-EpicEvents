@@ -20,14 +20,6 @@ class PermissionRule:
                 "name": "manage_all_contracts",
                 "description": "Gérer tous les contrats"
             },
-            {
-                "name": "view_unassigned_events",
-                "description": "Voir les événements sans support assigné",
-            },
-            {
-                "name": "assign_support",
-                "description": "Assigner un support aux événements",
-            },
             # Permissions équipe commerciale
             {"name": "create_clients", "description": "Créer des clients"},
             {
@@ -39,20 +31,11 @@ class PermissionRule:
                 "description": "Modifier les contrats de ses clients",
             },
             {
-                "name": "view_filtered_contracts",
-                "description":
-                    "Filtrer les contrats par statut (non signés/non payés)",
-            },
-            {
                 "name": "create_event",
                 "description":
                     "Créer des événements pour les clients avec contrat signé",
             },
             # Permissions équipe support
-            {
-                "name": "view_own_events",
-                "description": "Voir ses propres événements assignés",
-            },
             {
                 "name": "update_own_events",
                 "description": "Modifier ses propres événements",
@@ -88,23 +71,6 @@ class PermissionRule:
                 "error_message":
                     "Seule l'équipe de gestion peut gérer tous les contrats",
             },
-            {
-                "permission_name": "view_unassigned_events",
-                "attribute": "user.role",
-                "operator": "==",
-                "value": "GESTION",
-                "error_message":
-                    "Seule l'équipe de gestion peut "
-                    "voir les événements non assignés",
-            },
-            {
-                "permission_name": "assign_support",
-                "attribute": "user.role",
-                "operator": "==",
-                "value": "GESTION",
-                "error_message":
-                    "Seule l'équipe de gestion peut assigner un support",
-            },
             # Règles pour l'équipe commerciale
             {
                 "permission_name": "create_clients",
@@ -132,7 +98,6 @@ class PermissionRule:
                     "Vous ne pouvez modifier que les contrats de vos clients",
             },
             # Règles pour l'équipe support
-
             {
                 "permission_name": "update_own_events",
                 "attribute": "event.support_contact_id",
@@ -141,15 +106,6 @@ class PermissionRule:
                 "error_message":
                     "Vous ne pouvez modifier que les "
                     "événements qui vous sont assignés",
-            },
-            {
-                "permission_name": "create_event",
-                "attribute": "user.role",
-                "operator": "==",
-                "value": "COMMERCIAL",
-                "error_message":
-                    "Seul un commercial peut créer un "
-                    "événement pour un contrat dument signé.",
             },
             # Un commercial peut créer un événement UNIQUEMENT pour ses
             # propres clients avec un contrat signé
@@ -169,6 +125,7 @@ class PermissionRule:
                 "error_message": "Vous ne pouvez créer un événement"
                 " que si le contrat est signé.",
             },
+            # Règles globales de lecture
             {
                 "permission_name": "view_reports",
                 "attribute": "user.id",

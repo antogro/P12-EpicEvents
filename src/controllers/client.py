@@ -4,6 +4,7 @@ from src.models.client import Client
 from src.view.display_view import Display
 from src.models.permission import requires_permission, requires_login
 from src.models.common import get_session
+from src.models.user_session import UserSession
 
 display = Display()
 
@@ -27,11 +28,10 @@ def create_client(
             ..., prompt=True, help="Numéro de téléphone du client"),
         company_name: str = typer.Option(
             ..., prompt=True, help="Nom de la compagnie"),
-        commercial_id: int = typer.Option(
-            ..., prompt=True, help="ID du commercial"),
 ):
     """Crée un utilisateur dans la base de données"""
     try:
+        commercial_id = UserSession.get_current_user(ctx).id
         session = get_session()
         client = Client.create_object(
             session,

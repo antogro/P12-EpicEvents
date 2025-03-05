@@ -43,14 +43,14 @@ pip install -r requirements.txt
 ```  
 
 ### ✅ **4. Configuration du Projet**  
-Créer un fichier **`.env`** et ajouter les variables nécessaires :  
+Créer un fichier **`.env`** à la racine du projet et ajouter les variables nécessaires :  
 ```ini
 SECRET_KEY=your_secret_key_here
 DATABASE_URL=sqlite:///epic_event.db
 TOKEN_EXPIRATION=3600
 ```  
 
-### ✅ **5. Initialiser la Base de Données**  
+### ✅ **5. Initialiser la Base de Données et l'Administrateur Gestion**
 ```sh
 python database.py
 python create_admin.py
@@ -87,33 +87,39 @@ python main.py auth login --username admin --password AdminSecure123!
 ```  
 
 ### 🔹 **Gestion des Utilisateurs**  
-Créer un utilisateur :  
+Créer un utilisateur (Equipe Gestion):  
 ```sh
-python main.py user create --username manager --email manager@example.com --password admin123 --role GESTION
+python main.py user create --username testuser --email testuser@example.com --password password --role GESTION
 ```  
 
-Lister les utilisateurs :  
+Lister les utilisateurs (Toutes les Equipes):  
 ```sh
 python main.py user report
 ```  
 
 ### 🔹 **Gestion des Clients**  
-Créer un client :  
+Créer un client (Equipe Commerciale):  
 ```sh
 python main.py client create --first-name Alice --last-name Dupont --email alice@example.com --phone 0601020304 --company-name "Startup Inc."
 ```  
 
-### 🔹 **Gestion des Contrats**  
-Signer un contrat :  
+### 🔹 **Gestion des Contrats**
+Créer un contrat (Equipe Gestion):
+```sh
+python main.py contract create --client-id 1 --commercial-id 3 --total-amount 3000 --remaining-amount 3000
+```
+
+Signer un contrat (Equipe Commerciale/Gestion):  
 ```sh
 python main.py contract sign --id 4
 ```  
 
 ### 🔹 **Gestion des Événements**  
-Créer un événement :  
+Créer un événement (Equipe Gestion):  
 ```sh
-python main.py event create --client-id 1 --contract-id 1 --name Conférence annuelle --start-date 2024-09-15_09:00:00 --end-date 2024-09-15_12:00:00 --location Paris --attendees 50 --notes Événement VIP
+python main.py event create --client-id 1 --contract-id 1 --name Conférence annuelle --start-date 2029-09-15_09:00:00 --end-date 2029-09-15_12:00:00 --location Paris --attendees 50 --notes Événement VIP
 ```  
+
 
 ---
 

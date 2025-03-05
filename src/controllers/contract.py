@@ -29,12 +29,17 @@ def create(
     """Crée un contrat dans la base de données."""
     session = get_session()
     try:
+        is_signed = None
+        if typer.confirm(
+                "Le contrat est-il signé ?", default=False):
+            is_signed = True
         contract = Contract.create_object(
             session,
             client_id=client_id,
             commercial_id=commercial_id,
             total_amount=total_amount,
-            remaining_amount=remaining_amount
+            remaining_amount=remaining_amount,
+            is_signed=is_signed
         )
         typer.secho(f"✅ Contrat n°{contract.client_id} créé avec succès !")
     except Exception as e:
