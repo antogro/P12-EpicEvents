@@ -138,7 +138,7 @@ python main.py contract sign --id 3
 
 ### 🔹 **Gestion des Événements**  
 
-Créer un événement (Equipe Gestion):  
+Créer un événement (Equipe Commercial):  
 
 ```sh
 python main.py event create --client-id 1 --contract-id 1 --name Conférence-annuelle --start-date 2029-09-15_09:00:00 --end-date 2029-09-15_12:00:00 --location Paris --attendees 50 --notes Événement-VIP

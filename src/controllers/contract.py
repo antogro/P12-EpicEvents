@@ -52,6 +52,7 @@ def create(
 @requires_login()
 def contract_list(
     ctx: typer.Context,
+    id: Optional[int] = typer.Option(None, help="ID du contrat"),
     client_id: Optional[int] = typer.Option(None, help="ID du client"),
     contract_id: Optional[int] = typer.Option(None, help="ID du contrat"),
     is_signed: Optional[bool] = typer.Option(False, help="Contrats signés"),
@@ -63,6 +64,7 @@ def contract_list(
 ):
     """Récupère les contrats selon divers filtres."""
     contract_headers = [
+        "ID du contrat",
         "ID du client",
         "ID du commercial",
         "Montant total",

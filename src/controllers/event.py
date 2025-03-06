@@ -34,6 +34,10 @@ def create(
 ):
     """Crée un événement dans la base de données."""
     session = get_session()
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    ctx.obj["contract_id"] = contract_id
     try:
         support_contact_id = None
         if typer.confirm(

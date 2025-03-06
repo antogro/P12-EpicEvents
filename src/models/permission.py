@@ -87,7 +87,6 @@ class PermissionManager:
         obj = context.get(obj_type)
         if isinstance(obj, int) and session:
             obj = cls._get_object_by_type(session, obj_type, obj)
-            print('obj: ', obj)
         return getattr(obj, attr, attribute_path) if obj else attribute_path
 
     @classmethod
@@ -145,8 +144,8 @@ def requires_permission(*permission_names):
                     "❌ Vous devez être connecté.", fg=typer.colors.RED)
                 exit(1)
 
-            contract_id = kwargs.get("id")
-            client_id = kwargs.get("id")
+            contract_id = kwargs.get("contract_id")
+            client_id = kwargs.get("client_id")
 
             contract = (
                 Contract.get_object(session, id=contract_id)

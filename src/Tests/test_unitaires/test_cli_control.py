@@ -28,12 +28,7 @@ def test_login(mocker):
 
 
 def test_verify_token(mocker):
-    """
-    Test de la vérification du token.
-    Must return (payload, token_data) so the CLI won't fail
-    on 'payload, token_data = Token.verify_token(...)'.
-    """
-    # Our code references "models.authentication.Token" so we patch that
+    """Test de la vérification d'un token"""
     mocker.patch(
         "src.models.authentication.Token.get_stored_token",
         return_value="fake-token"
@@ -68,7 +63,6 @@ def test_logout(mocker):
 
 
 def test_create_user(mocker, session, ctx_with_session, make_user):
-    # Mock `get_session` so it uses our fixture's session
     mocker.patch("src.controllers.user.get_session", return_value=session)
 
     mock_user = User(**make_user())
@@ -196,11 +190,7 @@ def test_create_contract(mocker, session, make_user):
 
 
 def test_sign_contract(mocker, session, make_user):
-    """
-    Must pass either manage_all_contracts or update_own_contracts,
-    so role=GESTION or role=COMMERCIAL with matching contract data.
-    Also the CLI might call typer.confirm => we pass "y".
-    """
+    """Test de la signature d'un contrat avec confirmation 'y'."""
     mocker.patch("src.controllers.contract.get_session", return_value=session)
     mocker.patch(
         "src.models.user_session.UserSession.get_current_user",
@@ -246,11 +236,7 @@ def test_delete_contract(mocker, session, make_user):
 
 
 def test_create_event(mocker, session, make_user, make_event):
-    """
-    Must have role=COMMERCIAL for create_event permission,
-    patch Event.create_object so no real DB write,
-    pass "obj={"session": session}" and the input fields.
-    """
+    """Test de la création d'un événement avec confirmation 'n'."""
     mocker.patch(
         "src.models.user_session.UserSession.get_current_user",
         return_value=User(**make_user(role="COMMERCIAL", id=2)),

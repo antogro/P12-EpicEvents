@@ -147,6 +147,7 @@ class Contract(BaseModel):
 
     def format_contract_data(session, contract):
         return {
+            "ID du contrat": contract.id,
             "ID du client": contract.client_id,
             "ID du commercial": contract.commercial_id,
             "Montant total": contract.total_amount,

@@ -148,6 +148,10 @@ def update_client(
 ):
     """Mise à jour d'un client"""
     session = get_session()
+    if ctx.obj is None:
+        ctx.obj = {}
+
+    ctx.obj["client_id"] = id
     try:
         client = Client.update_object(
             session,
