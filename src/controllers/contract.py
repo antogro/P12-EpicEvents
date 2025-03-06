@@ -99,21 +99,24 @@ def contract_list(
 @requires_permission("manage_all_contracts", "update_own_contracts")
 def sign_contract(
     ctx: typer.Context,
-    id: int = typer.Option(
+    contract_id: int = typer.Option(
         ..., prompt=True, help="ID du contrat à signer"),
 ):
     """Signe un contrat."""
-    typer.confirm("Validation de la signature du contrat ✅")
     session = get_session()
 
     if ctx.obj is None:
         ctx.obj = {}
 
-    ctx.obj["contract_id"] = id
+    ctx.obj["contract_id"] = contract_id
 
     try:
-        Contract.sign_object(session, contract_id=id)
-        typer.secho(f"✅ Contrat n°{id} signé avec succès !")
+        if typer.confirm("Validation de la signature du contrat ✅"):
+            Contract.sign_object(session, contract_id=contract_id)
+            typer.secho(f"✅ Contrat n°{contract_id} signé avec succès !")
+        else:
+            typer.secho("❌ Signature annulée", fg=typer.colors
+                        .RED)
     except Exception as e:
         typer.secho(f"\n ❌ {str(e)}", fg=typer.colors.RED)
 

@@ -144,7 +144,7 @@ def requires_permission(*permission_names):
                     "❌ Vous devez être connecté.", fg=typer.colors.RED)
                 exit(1)
 
-            contract_id = kwargs.get("id")
+            contract_id = kwargs.get("contract_id")
             client_id = kwargs.get("id")
 
             contract = (
