@@ -145,7 +145,7 @@ def requires_permission(*permission_names):
                 exit(1)
 
             contract_id = kwargs.get("contract_id")
-            client_id = kwargs.get("client_id")
+            client_id = kwargs.get("id")
 
             contract = (
                 Contract.get_object(session, id=contract_id)
