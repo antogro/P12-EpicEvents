@@ -4,6 +4,7 @@ from src.models.base import BaseModel
 from src.models.validators import ContractValidator
 from src.models.user import User
 from src.config.sentry_base import logger
+from sentry_sdk import capture_message, capture_exception
 
 
 class Contract(BaseModel):
@@ -119,13 +120,15 @@ class Contract(BaseModel):
                 raise Exception("Le contrat n'existe pas")
 
             contract.is_signed = True
-            logger.info(
-                f"Contrat ID {contract_id}."
-                f"\n ID du commrcial : {contract.commercial_id}")
+            success_message = (f"Contrat ID {contract_id} signé;"
+                               f" ID du commercial : {contract.commercial_id}")
+            logger.info(success_message)
+            capture_message(success_message)
             return cls._save_object(session, contract)
         except Exception as e:
             logger.error(f"Erreur lors de la signature du contrat "
                          f"{contract_id}: {str(e)}")
+            capture_exception(e)
             raise Exception(
                 f"Une erreur lors de la signature du contrat: {str(e)}")
 

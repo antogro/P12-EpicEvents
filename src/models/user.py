@@ -4,6 +4,7 @@ from src.models.base import BaseModel
 from src.models.validators import UserValidator
 import hashlib
 import os
+from sentry_sdk import capture_message, capture_exception
 from src.config.sentry_base import logger
 from enum import Enum
 
@@ -81,12 +82,14 @@ class User(BaseModel):
             if cls.get_object(session, email=kwargs['email']):
                 raise Exception("Un utilisateur avec cet email existe déjà")
             kwargs['password'] = cls.hash_password(kwargs['password'])
-            logger.info(
-                f"Utilisateur '{kwargs["username"]}' créé avec succès")
+            success_message = f"Utilisateur '{kwargs['username']}' créé"
+            logger.info(success_message)
+            capture_message(success_message)
             return cls._save_object(session, cls(**kwargs))
         except Exception as e:
             logger.error("Erreur lors de la création de l'utilisateur "
                          f"'{kwargs["username"]}': {str(e)}")
+            capture_exception(e)
             raise Exception(f'Erreur lors de la création'
                             f' de l\'utilisateur : {str(e)}')
 
@@ -121,12 +124,15 @@ class User(BaseModel):
             for key, value in updates.items():
                 if hasattr(user, key) and value is not None:
                     setattr(user, key, value)
-            logger.info(f" Utilisateur '{user.username}' mis à jour")
+            success_message = f"Utilisateur '{user.username}' mis à jour"
+            logger.info(success_message)
+            capture_message(success_message)
             return cls._save_object(session, user)
         except Exception as e:
             session.rollback()
             logger.error("Erreur lors de la mise à jour de l'utilisateur "
                          f"'{id}': {str(e)}")
+            capture_exception(e)
             raise Exception(
                 f"Erreur lors de la mise à jour de l'utilisateur: {str(e)}"
             )
